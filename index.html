@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Planner · Redirecting…</title>
+  <link rel="stylesheet" href="assets/style.css"/>
+</head>
+<body data-page="overview">
+
+  <div class="topbar">
+    <div class="container">
+    <div class="card">
+      <h2>Opening Strategic Life Map…</h2>
+      <p class="kicker">If you are not redirected automatically, click below.</p>
+      <a class="btn primary" href="strategic-life-map.html">Go to Strategic Life Map</a>
+    </div>
+  </div>
+
+  <script>
+    // Make the Life Map the primary landing page
+    window.location.replace("strategic-life-map.html");
+  </script>
+
+  <!-- Sync Modal -->
+  <div class="modal-backdrop" id="syncModalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Sync Settings">
+      <div class="modal-header">
+        <div class="modal-title">Sync (GitHub Gist)</div>
+        <button class="btn" data-close-sync>Close</button>
+      </div>
+      <p class="kicker">Auto-pull on load is ON. Push is manual. Token stays on this device only.</p>
+
+      <label>Gist ID</label>
+      <input id="syncGistId" placeholder="paste the Gist ID from the URL"/>
+
+      <label>GitHub Token (gist read/write)</label>
+      <input id="syncToken" type="password" placeholder="paste token here"/>
+
+      <label style="display:flex;align-items:center;gap:10px;margin-top:10px">
+        <input id="syncAutoPull" type="checkbox" style="width:auto"> Enable auto-pull on page load
+      </label>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="syncSave">Save</button>
+        <button class="btn good" id="syncPull">Pull</button>
+        <button class="btn warn" id="syncForcePull">Force Pull</button>
+        <button class="btn primary" id="syncPush">Push</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn bad" id="syncClear">Clear sync settings (this device)</button>
+      </div>
+      <p class="small" id="syncStatus"></p>
+      <p class="small">Cloud file name: <span class="mono">planner-data.json</span></p>
+    </div>
+  </div>
+
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
