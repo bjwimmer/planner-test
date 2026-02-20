@@ -1,4 +1,4 @@
-const BUILD_VERSION = 'v27-test-guarded';
+const BUILD_VERSION = 'v28-test-guarded-wide';
 
 
 /* === planner-test safeguards (auto-generated) === */
@@ -973,7 +973,7 @@ function initLifeMap(){
           <div>
             <strong>${escapeHtml(g.title||"")}</strong>
             <div class="meta">
-              <span class="pill ${urgencyPill(urgency)}">${urgencyLabel(urgency)}</span>
+              <!-- Urgency is edited via the dropdown below; keep the header clean to reduce visual noise. -->
               <span class="pill">${escapeHtml(domain)}</span>
             </div>
           </div>
@@ -1099,7 +1099,8 @@ function initLifeMap(){
         g.notes = notes.trim();
         g.urgency = urg;
         g.updatedAt = nowIso();
-        saveState(st); renderFooter(st);
+        // Re-render so the UI immediately reflects updated urgency/notes.
+        saveState(st); renderFooter(st); render();
       });
     });
 
@@ -1132,7 +1133,7 @@ ${g.notes||""}`.trim(), createdAt: now, updatedAt: now };
         g.linkedThreadIds = Array.isArray(g.linkedThreadIds) ? g.linkedThreadIds : [];
         g.linkedThreadIds.unshift(thread.id);
         g.updatedAt = now;
-        saveState(st); renderFooter(st);
+        saveState(st); renderFooter(st); render();
         alert("Thread created. Go to Thread Registry to work it.");
       });
     });
