@@ -1191,27 +1191,64 @@ function initIncomeMap(){
   startInput.value = st.incomeMap.startDate || "";
 
   function render(){
-    const w = weekNumberFromStart(st.incomeMap.startDate);
-    weekEl.textContent = w ? `Week ${w} of 12` : "Set a start date to compute your week.";
-    const cp = [
-      {w:4, label:"Week 4: tighten focus, drop non-earning distractions"},
-      {w:6, label:"Week 6: commit to 1–2 income channels, build pipeline"},
-      {w:8, label:"Week 8: evaluate traction; escalate if stalled"},
-      {w:10, label:"Week 10: decision runway for next phase (SS / part-time / pivot)"}
-    ];
-    checkpointsEl.innerHTML = cp.map(x=>{
-      const tone = w && w >= x.w ? "good" : "warn";
-      return `<div class="item">
-        <strong>${escapeHtml(x.label)}</strong>
-        <div class="meta">
-          <span class="pill ${tone}">${w && w>=x.w ? "Reached" : "Upcoming"}</span>
-          ${w ? `<span class="pill">Current: Week ${w}</span>` : ``}
-        </div>
-      </div>`;
-    }).join("");
-  }
+  const w = weekNumberFromStart(st.incomeMap.startDate);
+  weekEl.textContent = w ? `Week ${w} of 12` : `—`;
 
-  startInput.addEventListener("change", ()=>{
+  const cps = [
+    {week:4, title:"Tighten focus", detail:"Drop non-earning distractions", threadTitle:"Income runway — Week 4: tighten focus", nextAction:"Pick 1–2 income channels; pause one non-earning distraction."},
+    {week:6, title:"Commit & pipeline", detail:"Commit to 1–2 channels, build pipeline", threadTitle:"Income runway — Week 6: commit & pipeline", nextAction:"Write next 3 outreach/listing steps; schedule first one today."},
+    {week:8, title:"Evaluate traction", detail:"Escalate if stalled", threadTitle:"Income runway — Week 8: evaluate traction", nextAction:"Review wins/metrics; decide keep / adjust / stop one channel."},
+    {week:10, title:"Decision runway", detail:"SS / part-time / pivot", threadTitle:"Income runway — Week 10: decision runway", nextAction:"Draft decision notes + 2 questions; book 1 call if needed."},
+  ];
+
+  cpsEl.innerHTML = cps.map(cp=>{
+    const isUpcoming = w ? (w < cp.week) : true;
+    const isNow = w ? (w >= cp.week && w < cp.week + 2) : false;
+
+    return `
+    <div class="card">
+      <h3>Week ${cp.week}: ${cp.title}</h3>
+      <div class="small">${cp.detail}</div>
+
+      <div class="row" style="gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap">
+        <span class="pill ${isNow ? 'good' : (isUpcoming ? 'warn' : '')}" style="pointer-events:none">
+          ${isNow ? 'Current window' : (isUpcoming ? 'Upcoming' : 'Passed')}
+        </span>
+        ${w ? `<span class="pill" style="pointer-events:none">Current: Week ${w}</span>` : ``}
+        <button class="btn mini" data-mkthread="${cp.week}" title="Create a thread in the Registry">Make thread</button>
+      </div>
+
+      <div class="small" style="margin-top:10px"><span class="mono">Suggested micro-action:</span> ${escapeHtml(cp.nextAction)}</div>
+    </div>`;
+  }).join("");
+
+  // Wire checkpoint -> thread creation
+  cpsEl.querySelectorAll("[data-mkthread]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const wk = Number(btn.getAttribute("data-mkthread"));
+      const cp = cps.find(x=>x.week===wk);
+      if(!cp) return;
+
+      const now = nowIso();
+      const thread = {
+        id: uid(),
+        title: cp.threadTitle,
+        status: "active",
+        domain: "Income",
+        nextAction: cp.nextAction,
+        notes: `Created from Income Map checkpoint (Week ${wk}).\n\n${cp.detail}`,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      st.threads.push(thread);
+      saveState();
+      alert("Thread created in Thread Registry (domain: Income).");
+    });
+  });
+}
+
+    startInput.addEventListener("change", ()=>{
     st.incomeMap.startDate = startInput.value || null;
     saveState(st); renderFooter(st); render();
   });

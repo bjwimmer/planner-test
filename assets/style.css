@@ -377,3 +377,7 @@ html[data-color="plus"] .card::before{
     background: rgba(255, 0, 102, .10);
   }
 }
+
+
+/* Income Map small action button */
+.btn.mini{padding:6px 10px; font-size:12px; line-height:1.1;}
