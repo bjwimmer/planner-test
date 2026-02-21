@@ -387,7 +387,7 @@ html[data-color="plus"] .card::before{
   min-width:44px;
   height:40px;
   padding:6px 10px;
-  font-size:20px;
+  font-size:24px;
   line-height:1;
   font-weight:700;
 }
