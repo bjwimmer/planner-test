@@ -1,4 +1,4 @@
-const BUILD_VERSION = 'v28-test-guarded-wide';
+const BUILD_VERSION = 'v30-test-guarded-wide';
 
 
 /* === planner-test safeguards (auto-generated) === */
