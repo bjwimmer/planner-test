@@ -381,3 +381,26 @@ html[data-color="plus"] .card::before{
 
 /* Income Map small action button */
 .btn.mini{padding:6px 10px; font-size:12px; line-height:1.1;}
+
+/* Life Map goal move arrows */
+.btn.arrow{
+  min-width:44px;
+  height:40px;
+  padding:6px 10px;
+  font-size:20px;
+  line-height:1;
+  font-weight:700;
+}
+.arrow.disabled{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  height:40px;
+  opacity:0.35;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:rgba(255,255,255,.6);
+  font-size:20px;
+  font-weight:700;
+}

@@ -1,4 +1,4 @@
-const BUILD_VERSION = 'v28-test-guarded-wide';
+const BUILD_VERSION = 'v31-test-guarded-wide';
 
 
 /* === planner-test safeguards (auto-generated) === */
@@ -964,8 +964,8 @@ function initLifeMap(){
     const notesLines = (g.notes||"").split("\n").filter(x=>x.trim());
     const mini = notesLines.slice(0,3).map(x=>`<li>${escapeHtml(x)}</li>`).join("");
     const more = notesLines.length>3 ? `<div class="small">+${notesLines.length-3} more</div>` : "";
-    const leftBtn = (hKey!=="week") ? `<button class="btn" data-demote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">⬅</button>` : `<span></span>`;
-    const rightBtn = (hKey!=="quarter") ? `<button class="btn" data-promote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">➡</button>` : `<span></span>`;
+    const leftBtn = (hKey!=="week") ? `<button class="btn arrow" title="Move sooner (toward This Week)" data-left="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">◀</button>` : `<span class="arrow disabled" title="Already in This Week">◀</span>`;
+    const rightBtn = (hKey!=="quarter") ? `<button class="btn arrow" title="Move later (toward 3 Months)" data-right="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">▶</button>` : `<span class="arrow disabled" title="Already in 3 Months">▶</span>`;
     return `
       <div class="goal ${dClass}">
         <div class="domain-strip"></div>
@@ -1069,21 +1069,12 @@ function initLifeMap(){
     });
 
     // Promote / demote
-    root.querySelectorAll("[data-promote]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const id = btn.getAttribute("data-promote");
-        const hKey = btn.getAttribute("data-h");
-        const domain = btn.getAttribute("data-d");
-        moveGoal(id, hKey, domain, "promote");
-      });
-    });
-    root.querySelectorAll("[data-demote]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const id = btn.getAttribute("data-demote");
-        const hKey = btn.getAttribute("data-h");
-        const domain = btn.getAttribute("data-d");
-        moveGoal(id, hKey, domain, "demote");
-      });
+    root.querySelectorAll("[data-left]").forEach(btn=>{
+    btn.onclick = ()=> moveGoal(btn.getAttribute("data-d"), btn.getAttribute("data-h"), btn.getAttribute("data-left"), "sooner");
+  });
+  root.querySelectorAll("[data-right]").forEach(btn=>{
+    btn.onclick = ()=> moveGoal(btn.getAttribute("data-d"), btn.getAttribute("data-h"), btn.getAttribute("data-right"), "later");
+  });
     });
 
     // Save / delete / thread
@@ -1151,8 +1142,9 @@ ${g.notes||""}`.trim(), createdAt: now, updatedAt: now };
   function moveGoal(id, hKey, domain, dir){
     const order = ["week","month","quarter"];
     const idx = order.indexOf(hKey);
-    const target = dir==="promote" ? order[Math.max(0, idx-1)] : order[Math.min(order.length-1, idx+1)];
-    // promote means toward week (more urgent): quarter -> month -> week
+    const target = dir==="sooner" ? order[Math.max(0, idx-1)] : order[Math.min(order.length-1, idx+1)];
+    // sooner = toward This Week (more urgent): quarter -> month -> week
+// later  = toward 3 Months (less urgent): week -> month -> quarter
     const fromKey = hKey;
     const toKey = target;
 
