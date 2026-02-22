@@ -1,4 +1,4 @@
-const BUILD_VERSION = 'v28-test-guarded-wide';
+const BUILD_VERSION = 'v35-test-guarded-wide';
 
 
 /* === planner-test safeguards (auto-generated) === */
@@ -1307,6 +1307,167 @@ function daysSince(dateStr){
 }
 
 function initOverview(){
+function initHome(){
+  const root = document.getElementById('homeRoot');
+  if(!root) return;
+
+  const ORIENT_KEY = STORE_KEY.replace('.data.', '.orient.');
+  const nowIso = () => new Date().toISOString();
+
+  const DEFAULTS = {
+    northStar: "Keep it short. Keep it true. Keep it kind. Build what lasts.\n\n(Unlock to edit.)",
+    ninetyDayTarget: "",
+    ninetyDayTop3: ["","",""],
+    weekCommitments: ["","",""],
+    todayLever: "",
+    notes: ""
+  };
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(ORIENT_KEY);
+      if(!raw) return {...DEFAULTS, _meta:{unlockedUntil:0}};
+      const obj = JSON.parse(raw);
+      return {...DEFAULTS, ...obj, _meta:{...(obj._meta||{}), unlockedUntil: (obj._meta?.unlockedUntil||0)}};
+    }catch(e){
+      return {...DEFAULTS, _meta:{unlockedUntil:0}};
+    }
+  }
+
+  function save(state){
+    const out = {...state};
+    out._meta = out._meta || {};
+    out._meta.updatedAt = nowIso();
+    localStorage.setItem(ORIENT_KEY, JSON.stringify(out));
+    document.querySelectorAll('[data-last-saved]').forEach(el=>el.textContent = new Date().toLocaleString());
+  }
+
+  function isUnlocked(state){
+    return (state?._meta?.unlockedUntil||0) > Date.now();
+  }
+
+  function requestUnlock(state){
+    const code = prompt('Type UNLOCK to edit North Star (10 minutes):');
+    if((code||'').trim().toUpperCase() !== 'UNLOCK') return state;
+    state._meta = state._meta || {};
+    state._meta.unlockedUntil = Date.now() + 10*60*1000;
+    save(state);
+    render(state);
+    return state;
+  }
+
+  function esc(s){
+    return String(s ?? '').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  }
+
+  function render(state){
+    const unlocked = isUnlocked(state);
+
+    root.innerHTML = `
+      <div class="homeStack">
+        <div class="card homeCard">
+          <div class="homeHeader">
+            <div>
+              <div class="homeTitle">North Star</div>
+              <div class="homeSub">Static on purpose. One job: keep you oriented.</div>
+            </div>
+            <button class="btn ${unlocked?'good':''}" id="homeUnlock">${unlocked?'Unlocked (10m)':'Unlock to edit'}</button>
+          </div>
+          <textarea class="homeArea" id="homeNorthStar" ${unlocked?'':'readonly'} rows="3">${esc(state.northStar)}</textarea>
+        </div>
+
+        <div class="card homeCard">
+          <div class="homeHeader">
+            <div>
+              <div class="homeTitle">90‑Day Gate</div>
+              <div class="homeSub">The next meaningful window. Top 3 keeps it honest.</div>
+            </div>
+          </div>
+
+          <div class="homeRow">
+            <label class="homeLabel">Target date</label>
+            <input class="homeInput" id="home90Date" type="date" value="${esc(state.ninetyDayTarget)}"/>
+          </div>
+
+          <div class="homeGrid3">
+            <div>
+              <label class="homeLabel">Top 3 (90 days)</label>
+              <input class="homeInput" id="home90_1" placeholder="1)" value="${esc(state.ninetyDayTop3[0]||'')}"/>
+              <input class="homeInput" id="home90_2" placeholder="2)" value="${esc(state.ninetyDayTop3[1]||'')}"/>
+              <input class="homeInput" id="home90_3" placeholder="3)" value="${esc(state.ninetyDayTop3[2]||'')}"/>
+            </div>
+            <div>
+              <label class="homeLabel">Notes</label>
+              <textarea class="homeArea" id="home90Notes" rows="4" placeholder="Constraints, blockers, reality checks…">${esc(state.notes)}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card homeCard">
+          <div class="homeHeader">
+            <div>
+              <div class="homeTitle">This Week</div>
+              <div class="homeSub">A few commitments you can actually carry.</div>
+            </div>
+          </div>
+
+          <div class="homeGrid3">
+            <div>
+              <label class="homeLabel">Weekly commitments (3)</label>
+              <input class="homeInput" id="homeW_1" placeholder="1)" value="${esc(state.weekCommitments[0]||'')}"/>
+              <input class="homeInput" id="homeW_2" placeholder="2)" value="${esc(state.weekCommitments[1]||'')}"/>
+              <input class="homeInput" id="homeW_3" placeholder="3)" value="${esc(state.weekCommitments[2]||'')}"/>
+            </div>
+            <div>
+              <label class="homeLabel">Today’s lever</label>
+              <input class="homeInput" id="homeToday" placeholder="The one move that makes today real…" value="${esc(state.todayLever)}"/>
+              <div class="small" style="margin-top:8px">Tip: if this feels fuzzy, open <span class="mono">Quick Capture</span> and dump noise first.</div>
+            </div>
+          </div>
+
+          <div class="row" style="justify-content:flex-end; margin-top:10px; gap:10px">
+            <button class="btn good" id="homeSave">Save</button>
+            <button class="btn warn" id="homeReset">Reset (this page)</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const $ = (id)=>document.getElementById(id);
+
+    $('homeUnlock')?.addEventListener('click', ()=>{ requestUnlock(state); });
+
+    function collect(){
+      const next = {...state};
+      next.northStar = $('homeNorthStar')?.value ?? next.northStar;
+      next.ninetyDayTarget = $('home90Date')?.value ?? '';
+      next.ninetyDayTop3 = [ $('home90_1')?.value||'', $('home90_2')?.value||'', $('home90_3')?.value||'' ];
+      next.weekCommitments = [ $('homeW_1')?.value||'', $('homeW_2')?.value||'', $('homeW_3')?.value||'' ];
+      next.todayLever = $('homeToday')?.value ?? '';
+      next.notes = $('home90Notes')?.value ?? '';
+      return next;
+    }
+
+    $('homeSave')?.addEventListener('click', ()=>{ const next = collect(); save(next); });
+
+    $('homeReset')?.addEventListener('click', ()=>{
+      if(!confirm('Reset only the Morning Map page content? (Your planner data stays intact.)')) return;
+      const next = {...DEFAULTS, _meta:{unlockedUntil:0}};
+      save(next);
+      render(next);
+    });
+
+    // lightweight autosave: on blur
+    root.querySelectorAll('input,textarea').forEach(el=>{
+      el.addEventListener('blur', ()=>{ save(collect()); });
+    });
+  }
+
+  const state = load();
+  render(state);
+  document.querySelectorAll('[data-last-saved]').forEach(el=>el.textContent = new Date().toLocaleString());
+}
+
   const state = loadState();
   const root = document.body;
   const activeThreads = (state.threads||[]).filter(t=>t.status!=="archived");

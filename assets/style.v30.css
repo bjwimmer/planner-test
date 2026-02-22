@@ -381,3 +381,21 @@ html[data-color="plus"] .card::before{
 
 /* Income Map small action button */
 .btn.mini{padding:6px 10px; font-size:12px; line-height:1.1;}
+
+/* Morning Map (index) */
+.homeStack{display:flex; flex-direction:column; gap:14px;}
+.homeCard{padding:16px;}
+.homeHeader{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:10px;}
+.homeTitle{font-weight:800; font-size:18px; letter-spacing:.2px;}
+.homeSub{color:var(--muted); font-size:13px; margin-top:2px;}
+.homeLabel{display:block; color:var(--muted); font-size:12px; margin-bottom:6px;}
+.homeRow{display:flex; align-items:center; gap:10px; margin-top:8px;}
+.homeRow .homeLabel{min-width:88px; margin:0;}
+.homeInput{width:100%; border:1px solid rgba(27,32,62,.18); border-radius:14px; padding:10px 12px; background:rgba(255,255,255,.8); box-shadow:0 8px 18px rgba(22,28,55,.06);}
+.homeArea{width:100%; border:1px solid rgba(27,32,62,.18); border-radius:14px; padding:10px 12px; background:rgba(255,255,255,.8); box-shadow:0 8px 18px rgba(22,28,55,.06); resize:vertical;}
+.homeGrid3{display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:10px;}
+@media (max-width: 920px){
+  .homeGrid3{grid-template-columns: 1fr;}
+  .homeRow{flex-direction:column; align-items:stretch;}
+  .homeRow .homeLabel{min-width:0;}
+}
