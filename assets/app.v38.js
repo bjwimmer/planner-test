@@ -1,4 +1,4 @@
-const BUILD_VERSION = 'v38-test-guarded-wide';
+const BUILD_VERSION = 'v39-test-guarded-wide';
 
 
 /* === planner-test safeguards (auto-generated) === */
@@ -1370,6 +1370,15 @@ function initMorningMap() {
 
           <h3 style="margin:16px 0 8px 0;">Scratchpad</h3>
           <textarea id="mmScratch" style="width:100%; min-height:120px;" placeholder="A quick note to future-you..."></textarea>
+
+          <h3 style="margin:16px 0 8px 0;">Quick links</h3>
+          <div class="row" style="gap:10px; flex-wrap:wrap;">
+            <a class="btn" href="thread-registry.html">Thread Registry</a>
+            <a class="btn" href="strategic-life-map.html">Strategic Life Map</a>
+            <a class="btn" href="quick-capture.html">Quick Capture</a>
+            <a class="btn" href="90-day-income-map.html">90-Day Income Map</a>
+            <a class="btn" href="how-this-works.html">How This Works</a>
+          </div>
         </div>
       </div>
     </div>
