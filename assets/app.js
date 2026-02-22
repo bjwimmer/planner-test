@@ -1,4 +1,4 @@
-const BUILD_VERSION = 'v35-test-guarded-wide';
+const BUILD_VERSION = 'v36-test-guarded-wide';
 
 
 /* === planner-test safeguards (auto-generated) === */
@@ -1261,6 +1261,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   const page = (document.body.getAttribute("data-page")||"").toLowerCase();
   if(page==="quick") initQuickCapture();
   else if(page==="registry") initThreadRegistry();
+  else if(page==="home") initMorningMap();
   else if(page==="lifemap") initLifeMap();
   else if(page==="overview") initOverview();
   else if(page==="income") initIncomeMap();
