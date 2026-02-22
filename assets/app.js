@@ -1307,6 +1307,84 @@ function daysSince(dateStr){
   return (now - dt)/(1000*60*60*24);
 }
 
+
+function initMorningMap() {
+  const root = document.querySelector('.container');
+  if (!root) return;
+  const st = loadState();
+  st.meta = st.meta || {};
+  if (!st.meta.morningMapText) {
+    st.meta.morningMapText = "Planner Orientation Layer \u2014 Implementation Blueprint v1.0\n\nThis document defines the calm, structured, orientation-first homepage layer for the existing planner system. It is an additive front-layer, not a rebuild. All existing planner pages and logic remain intact.\n\nCore Design Intent\n\nTone: Relaxed, creative, open.\nEmotional Effect: Structured stillness.\nFunction: Orientation before execution.\nRule: One continuous vertical layout. No collapsible sections above the fold.\n\nHomepage Structure (Top to Bottom)\n\n1. NORTH STAR (Locked Section)\n\nAnchoring Sentence (locked, editable only during scheduled review):\n\n\u201cI finish my life in peace \u2014 no debt left behind, no burden passed forward, living comfortably enough to create and care for myself.\u201d\n\nPractical Bullet Conditions (locked):\n\n\u2022 No consumer debt.\n\n\u2022 Housing path resolved and documented.\n\n\u2022 Home simplified and document-ready.\n\n\u2022 Income baseline stable with protected creative time.\n\n2. 90-DAY GATE (Current Season)\n\nHeader format: By [Insert Date]\n\n\u2022 Housing decision path chosen.\n\n\u2022 Debt strategy documented and active.\n\n\u2022 Minimum viable home clear established.\n\n3. THIS WEEK (Maximum 3 Commitments)\n\nOnly 1\u20133 commitments allowed. Each must have a clear 'done' definition.\n\nExample placeholders:\n\n\u2022 [Commitment 1]\n\n\u2022 [Commitment 2]\n\n\u2022 [Commitment 3]\n\n4. TODAY (One Lever Only)\n\nSingle action that advances one weekly commitment. No additional task lists visible on homepage.\n\nNavigation Rules\n\nAll deeper planner pages remain intact.\nA simple 'Home' link is added to each deeper page.\nHomepage remains the browser default start page.\nNo metrics, widgets, progress bars, or dashboards added.\n\nVisual Tone Guidelines\n\nBackground: Warm cream or soft neutral.\nText: Dark slate or charcoal (not pure black).\nAccent hierarchy:\n\u2022 Deep muted teal for North Star.\n\u2022 Warm clay/amber for 90-Day Gate.\n\u2022 Soft sage or gray-blue for Weekly.\n\u2022 Subtle highlight for Today.\nTypography: Soft serif for headings; clean sans-serif for body.\n\nGuardrails\n\n\u2022 Homepage must fit on one screen without scrolling.\n\u2022 North Star text remains locked except during scheduled review.\n\u2022 No new sections added without revisiting structure intentionally.\n\u2022 This page serves orientation, not tracking.";
+  }
+  if (!st.meta.morningScratch) st.meta.morningScratch = '';
+  const slot1 = st.weekly?.slot1 || '';
+  const slot2 = st.weekly?.slot2 || '';
+  const t1 = (st.threads || []).find(t => t.id === slot1);
+  const t2 = (st.threads || []).find(t => t.id === slot2);
+
+  root.innerHTML = `
+    <div class="card" style="padding:18px;">
+      <h2 style="margin:0 0 6px 0;">Morning Map</h2>
+      <div class="small" style="margin-bottom:14px;">Orientation first. Execution second.</div>
+
+      <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:16px;">
+        <div class="card" style="padding:14px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <h3 style="margin:0;">Orientation layer</h3>
+            <button class="btn" id="mmReset" title="Reset to default">Reset</button>
+          </div>
+          <textarea id="mmText" style="width:100%; min-height:260px; margin-top:10px;" spellcheck="false"></textarea>
+          <div class="row" style="margin-top:10px; gap:10px;">
+            <button class="btn primary" id="mmSave">Save</button>
+            <span class="small" id="mmStatus"></span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:14px;">
+          <h3 style="margin:0 0 10px 0;">Focus strip</h3>
+          <div class="small" style="margin-bottom:10px;">Your two active threads for the week.</div>
+          <div class="card" style="padding:10px; margin-bottom:10px;">
+            <div class="small">Weekly Slot #1</div>
+            <div style="font-weight:700; margin-top:4px;">${t1 ? esc(t1.title) : '—'}</div>
+            <div class="small" style="margin-top:4px;">${t1?.micro ? esc(t1.micro) : ''}</div>
+          </div>
+          <div class="card" style="padding:10px;">
+            <div class="small">Weekly Slot #2</div>
+            <div style="font-weight:700; margin-top:4px;">${t2 ? esc(t2.title) : '—'}</div>
+            <div class="small" style="margin-top:4px;">${t2?.micro ? esc(t2.micro) : ''}</div>
+          </div>
+
+          <h3 style="margin:16px 0 8px 0;">Scratchpad</h3>
+          <textarea id="mmScratch" style="width:100%; min-height:120px;" placeholder="A quick note to future-you..."></textarea>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const mmText = document.getElementById('mmText');
+  const mmScratch = document.getElementById('mmScratch');
+  const mmStatus = document.getElementById('mmStatus');
+  mmText.value = st.meta.morningMapText || '';
+  mmScratch.value = st.meta.morningScratch || '';
+
+  const save = () => {
+    st.meta.morningMapText = mmText.value;
+    st.meta.morningScratch = mmScratch.value;
+    saveState(st);
+    mmStatus.textContent = 'Saved.';
+    setTimeout(() => { mmStatus.textContent = ''; }, 1200);
+  };
+
+  document.getElementById('mmSave')?.addEventListener('click', save);
+  mmText.addEventListener('change', save);
+  mmScratch.addEventListener('change', save);
+  document.getElementById('mmReset')?.addEventListener('click', () => {
+    mmText.value = "Planner Orientation Layer \u2014 Implementation Blueprint v1.0\n\nThis document defines the calm, structured, orientation-first homepage layer for the existing planner system. It is an additive front-layer, not a rebuild. All existing planner pages and logic remain intact.\n\nCore Design Intent\n\nTone: Relaxed, creative, open.\nEmotional Effect: Structured stillness.\nFunction: Orientation before execution.\nRule: One continuous vertical layout. No collapsible sections above the fold.\n\nHomepage Structure (Top to Bottom)\n\n1. NORTH STAR (Locked Section)\n\nAnchoring Sentence (locked, editable only during scheduled review):\n\n\u201cI finish my life in peace \u2014 no debt left behind, no burden passed forward, living comfortably enough to create and care for myself.\u201d\n\nPractical Bullet Conditions (locked):\n\n\u2022 No consumer debt.\n\n\u2022 Housing path resolved and documented.\n\n\u2022 Home simplified and document-ready.\n\n\u2022 Income baseline stable with protected creative time.\n\n2. 90-DAY GATE (Current Season)\n\nHeader format: By [Insert Date]\n\n\u2022 Housing decision path chosen.\n\n\u2022 Debt strategy documented and active.\n\n\u2022 Minimum viable home clear established.\n\n3. THIS WEEK (Maximum 3 Commitments)\n\nOnly 1\u20133 commitments allowed. Each must have a clear 'done' definition.\n\nExample placeholders:\n\n\u2022 [Commitment 1]\n\n\u2022 [Commitment 2]\n\n\u2022 [Commitment 3]\n\n4. TODAY (One Lever Only)\n\nSingle action that advances one weekly commitment. No additional task lists visible on homepage.\n\nNavigation Rules\n\nAll deeper planner pages remain intact.\nA simple 'Home' link is added to each deeper page.\nHomepage remains the browser default start page.\nNo metrics, widgets, progress bars, or dashboards added.\n\nVisual Tone Guidelines\n\nBackground: Warm cream or soft neutral.\nText: Dark slate or charcoal (not pure black).\nAccent hierarchy:\n\u2022 Deep muted teal for North Star.\n\u2022 Warm clay/amber for 90-Day Gate.\n\u2022 Soft sage or gray-blue for Weekly.\n\u2022 Subtle highlight for Today.\nTypography: Soft serif for headings; clean sans-serif for body.\n\nGuardrails\n\n\u2022 Homepage must fit on one screen without scrolling.\n\u2022 North Star text remains locked except during scheduled review.\n\u2022 No new sections added without revisiting structure intentionally.\n\u2022 This page serves orientation, not tracking.";
+    save();
+  });
+}
+
+
 function initOverview(){
 function initHome(){
   const root = document.getElementById('homeRoot');
