@@ -157,7 +157,7 @@ window.addEventListener("unhandledrejection", (ev)=>{ dbgAddError(ev.reason || "
 
 // Planner (Thread System) - localStorage-first, plus optional GitHub Gist sync.
 
-const STORE_KEY = "planner.data.v1";
+const STORE_KEY = "planner-test.data.v1";
 const SYNC_KEY  = "planner.sync.v1"; // {gistId, token, autoPull:true}
 const AUTO_PULL_SESSION_KEY = "planner.autoPulled.v1";
 const GIST_FILENAME = "planner-data.json";
