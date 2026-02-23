@@ -1321,7 +1321,7 @@ function initIncomeMap(){
     {week:10, title:"Decision runway", detail:"SS / part-time / pivot", threadTitle:"Income runway — Week 10: decision runway", nextAction:"Draft decision notes + 2 questions; book 1 call if needed."},
   ];
 
-  cpsEl.innerHTML = cps.map(cp=>{
+  checkpointsEl.innerHTML = cps.map(cp=>{
     const isUpcoming = w ? (w < cp.week) : true;
     const isNow = w ? (w >= cp.week && w < cp.week + 2) : false;
 
@@ -1343,7 +1343,7 @@ function initIncomeMap(){
   }).join("");
 
   // Wire checkpoint -> thread creation
-  cpsEl.querySelectorAll("[data-mkthread]").forEach(btn=>{
+  checkpointsEl.querySelectorAll("[data-mkthread]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const wk = Number(btn.getAttribute("data-mkthread"));
       const cp = cps.find(x=>x.week===wk);
