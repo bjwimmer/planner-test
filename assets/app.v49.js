@@ -1,4 +1,4 @@
-const BUILD_VERSION = "v49-live";
+const BUILD_VERSION = "v48-test-guarded-wide";
 const DEFAULT_ORIENTATION_TEXT = "Planner Orientation Layer \u2014 Implementation Blueprint v1.0\n\nThis document defines the calm, structured, orientation-first homepage layer for the existing planner system. It is an additive front-layer, not a rebuild. All existing planner pages and logic remain intact.\n\nCore Design Intent\n\nTone: Relaxed, creative, open.\nEmotional Effect: Structured stillness.\nFunction: Orientation before execution.\nRule: One continuous vertical layout. No collapsible sections above the fold.\n\nHomepage Structure (Top to Bottom)\n\n1. NORTH STAR (Locked Section)\n\nAnchoring Sentence (locked, editable only during scheduled review):\n\n\u201cI finish my life in peace \u2014 no debt left behind, no burden passed forward, living comfortably enough to create and care for myself.\u201d\n\nPractical Bullet Conditions (locked):\n\n\u2022 No consumer debt.\n\n\u2022 Housing path resolved and documented.\n\n\u2022 Home simplified and document-ready.\n\n\u2022 Income baseline stable with protected creative time.\n\n2. 90-DAY GATE (Current Season)\n\nHeader format: By [Insert Date]\n\n\u2022 Housing decision path chosen.\n\n\u2022 Debt strategy documented and active.\n\n\u2022 Minimum viable home clear established.\n\n3. THIS WEEK (Maximum 3 Commitments)\n\nOnly 1\u20133 commitments allowed. Each must have a clear 'done' definition.\n\nExample placeholders:\n\n\u2022 [Commitment 1]\n\n\u2022 [Commitment 2]\n\n\u2022 [Commitment 3]\n\n4. TODAY (One Lever Only)\n\nSingle action that advances one weekly commitment. No additional task lists visible on homepage.\n\nNavigation Rules\n\nAll deeper planner pages remain intact.\nA simple 'Home' link is added to each deeper page.\nHomepage remains the browser default start page.\nNo metrics, widgets, progress bars, or dashboards added.\n\nVisual Tone Guidelines\n\nBackground: Warm cream or soft neutral.\nText: Dark slate or charcoal (not pure black).\nAccent hierarchy:\n\u2022 Deep muted teal for North Star.\n\u2022 Warm clay/amber for 90-Day Gate.\n\u2022 Soft sage or gray-blue for Weekly.\n\u2022 Subtle highlight for Today.\nTypography: Soft serif for headings; clean sans-serif for body.\n\nGuardrails\n\n\u2022 Homepage must fit on one screen without scrolling.\n\u2022 North Star text remains locked except during scheduled review.\n\u2022 No new sections added without revisiting structure intentionally.\n\u2022 This page serves orientation, not tracking.";
 
 
@@ -10,7 +10,7 @@ function ensureTestDefaults() {
   try {
     let cfg = null;
     // Read whatever might already be stored under the test key
-    const raw = localStorage.getItem("planner.sync.v1");
+    const raw = localStorage.getItem("plannerTest.sync.v1");
     if (raw) {
       try { cfg = JSON.parse(raw); } catch(e) { cfg = {}; }
     } else {
@@ -18,7 +18,7 @@ function ensureTestDefaults() {
     }
     if (!cfg.gistId) cfg.gistId = DEFAULT_TEST_GIST_ID;
     // Save ONLY to the planner-test key so we never touch production config.
-    localStorage.setItem("planner.sync.v1", JSON.stringify(cfg));
+    localStorage.setItem("plannerTest.sync.v1", JSON.stringify(cfg));
   } catch(e) {}
 }
 
@@ -157,8 +157,8 @@ window.addEventListener("unhandledrejection", (ev)=>{ dbgAddError(ev.reason || "
 
 // Planner (Thread System) - localStorage-first, plus optional GitHub Gist sync.
 
-const STORE_KEY = "planner.data.v1";
-const SYNC_KEY  = "planner.sync.v1"; // {gistId, token, autoPull:true}
+const STORE_KEY = "plannerTest.data.v1";
+const SYNC_KEY  = "plannerTest.sync.v1"; // {gistId, token, autoPull:true}
 const AUTO_PULL_SESSION_KEY = "planner.autoPulled.v1";
 const GIST_FILENAME = "planner-data.json";
 
@@ -1380,7 +1380,7 @@ function initIncomeMap(){
 document.addEventListener("DOMContentLoaded", ()=>{
   dbgRefresh();
   ensureTopbarNav();
-  if (new URLSearchParams(location.search).get("debug") === "1") ensureDebugPanel();
+  ensureDebugPanel();
   dbgRenderPanel();
   const page = (document.body.getAttribute("data-page")||"").toLowerCase();
   if(page==="quick") { dbgMarkInit('quick'); initQuickCapture(); }
