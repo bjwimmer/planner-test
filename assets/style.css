@@ -466,3 +466,10 @@ html[data-color="plus"] .card::before{
 #debugPanel .dbg-body{padding:8px 10px;line-height:1.4}
 #debugPanel .dbg-k{opacity:.75}
 #debugPanel .dbg-btn{background:transparent;border:0;color:#fff;cursor:pointer;font-size:14px;line-height:1}
+
+
+/* Home quick links */
+.quicklinksCard{margin:14px 0;}
+.quicklinksGrid{display:flex;flex-wrap:wrap;gap:10px;}
+.btn.big{padding:12px 14px;border-radius:14px;}
+.btn.big{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;}
