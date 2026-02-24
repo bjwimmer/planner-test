@@ -450,6 +450,11 @@ function escapeAttr(s){
   return escapeHtml(s);
 }
 
+function cssEscape(s){
+  const v = String(s ?? "");
+  return (window.CSS && CSS.escape) ? CSS.escape(v) : v.replace(/[^a-zA-Z0-9_\-]/g, "\\$&");
+}
+
 function mondayOf(date){
   const d = new Date(date);
   const day = d.getDay(); // 0 Sun .. 6 Sat
@@ -1426,10 +1431,6 @@ ${g.notes||""}`.trim(), createdAt: now, updatedAt: now };
   // Helpers for UI labels
   function urgencyLabel(u){ return u==="high"?"High":(u==="low"?"Low":"Medium"); }
   function urgencyPill(u){ return u==="high"?"bad":(u==="low"?"good":"warn"); }
-
-  function cssEscape(s){
-    return (window.CSS && CSS.escape) ? CSS.escape(s) : s.replace(/[^a-zA-Z0-9_\-]/g, "\$&");
-  }
 
   render();
 }
