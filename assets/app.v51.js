@@ -1,4 +1,4 @@
-const BUILD_VERSION = "v51.1-test";
+const BUILD_VERSION = "v51.2";
 const DEFAULT_ORIENTATION_TEXT = "Planner Orientation Layer \u2014 Implementation Blueprint v1.0\n\nThis document defines the calm, structured, orientation-first homepage layer for the existing planner system. It is an additive front-layer, not a rebuild. All existing planner pages and logic remain intact.\n\nCore Design Intent\n\nTone: Relaxed, creative, open.\nEmotional Effect: Structured stillness.\nFunction: Orientation before execution.\nRule: One continuous vertical layout. No collapsible sections above the fold.\n\nHomepage Structure (Top to Bottom)\n\n1. NORTH STAR (Locked Section)\n\nAnchoring Sentence (locked, editable only during scheduled review):\n\n\u201cI finish my life in peace \u2014 no debt left behind, no burden passed forward, living comfortably enough to create and care for myself.\u201d\n\nPractical Bullet Conditions (locked):\n\n\u2022 No consumer debt.\n\n\u2022 Housing path resolved and documented.\n\n\u2022 Home simplified and document-ready.\n\n\u2022 Income baseline stable with protected creative time.\n\n2. 90-DAY GATE (Current Season)\n\nHeader format: By [Insert Date]\n\n\u2022 Housing decision path chosen.\n\n\u2022 Debt strategy documented and active.\n\n\u2022 Minimum viable home clear established.\n\n3. THIS WEEK (Maximum 3 Commitments)\n\nOnly 1\u20133 commitments allowed. Each must have a clear 'done' definition.\n\nExample placeholders:\n\n\u2022 [Commitment 1]\n\n\u2022 [Commitment 2]\n\n\u2022 [Commitment 3]\n\n4. TODAY (One Lever Only)\n\nSingle action that advances one weekly commitment. No additional task lists visible on homepage.\n\nNavigation Rules\n\nAll deeper planner pages remain intact.\nA simple 'Home' link is added to each deeper page.\nHomepage remains the browser default start page.\nNo metrics, widgets, progress bars, or dashboards added.\n\nVisual Tone Guidelines\n\nBackground: Warm cream or soft neutral.\nText: Dark slate or charcoal (not pure black).\nAccent hierarchy:\n\u2022 Deep muted teal for North Star.\n\u2022 Warm clay/amber for 90-Day Gate.\n\u2022 Soft sage or gray-blue for Weekly.\n\u2022 Subtle highlight for Today.\nTypography: Soft serif for headings; clean sans-serif for body.\n\nGuardrails\n\n\u2022 Homepage must fit on one screen without scrolling.\n\u2022 North Star text remains locked except during scheduled review.\n\u2022 No new sections added without revisiting structure intentionally.\n\u2022 This page serves orientation, not tracking.";
 
 
@@ -61,19 +61,38 @@ const NAV_ITEMS = [
   { href: "how-this-works.html", label: "How This Works" },
 ];
 
+
+function ensureInternalLinksSelf(){
+  try{
+    document.querySelectorAll("a[href]").forEach(a=>{
+      const href = (a.getAttribute("href")||"").trim();
+      if(!href) return;
+      if(href.startsWith("#")) return;
+      if(href.startsWith("mailto:")) return;
+      if(href.startsWith("tel:")) return;
+      if(href.startsWith("http://") || href.startsWith("https://")) return;
+      // Treat relative HTML navigations as internal
+      if(href.endsWith(".html") || href.includes(".html?") || href.includes(".html#")){
+        a.setAttribute("target","_self");
+      }
+    });
+  }catch(e){}
+}
+
 function ensureTopbarNav(){
   try{
     const nav = document.querySelector(".topbar .nav");
     if(!nav) return;
     // Rebuild nav consistently
-    nav.innerHTML = NAV_ITEMS.map(it => `<a data-nav href="${it.href}">${escHtml(it.label)}</a>`).join("");
+    nav.innerHTML = NAV_ITEMS.map(it => `<a data-nav target="_self" href="${it.href}">${escHtml(it.label)}</a>`).join("");
     // Highlight current
     const here = (location.pathname.split("/").pop() || "index.html").toLowerCase();
     nav.querySelectorAll("a[data-nav]").forEach(a=>{
       const href = (a.getAttribute("href")||"").toLowerCase();
       if(href===here) a.classList.add("active");
     });
-  }catch(e){}
+      ensureInternalLinksSelf();
+}catch(e){}
 }
 
 // --- Self-reporting debug panel (TEST mode only) ---
@@ -795,6 +814,21 @@ function initQuickCapture(){
 
 // --- Thread Registry ---
 // --- Domain auto-color mapping (UI only) ---
+function ensureLifeMapStripeOpacity(){
+  try{
+    const id = "lifemapStripeOpacityStyle";
+    if(document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      /* Life Map visual hierarchy: domain strip stays full; nested goals get lighter strip */
+      #lifeMapRoot .domain-block > .domain-strip{ opacity: 1; }
+      #lifeMapRoot .goal .domain-strip{ opacity: 0.45; }
+`;
+    document.head.appendChild(style);
+  }catch(e){}
+}
+
 function domainClass(domainRaw){
   const d = (domainRaw || "").trim().toLowerCase();
   if(!d) return "domain-other";
@@ -1074,6 +1108,8 @@ function initLifeMap(){
   const root = document.querySelector("#lifeMapRoot");
   if(!root) return;
 
+  ensureLifeMapStripeOpacity();
+
   const horizons = ["week","month","quarter"];
   const domains = st.lifeMap.domains;
 
@@ -1083,8 +1119,9 @@ function initLifeMap(){
     const notesLines = (g.notes||"").split("\n").filter(x=>x.trim());
     const mini = notesLines.slice(0,3).map(x=>`<li>${escapeHtml(x)}</li>`).join("");
     const more = notesLines.length>3 ? `<div class="small">+${notesLines.length-3} more</div>` : "";
-    const leftBtn = (hKey!=="week") ? `<button class="btn" data-promote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">⬅</button>` : `<span></span>`;
-    const rightBtn = (hKey!=="quarter") ? `<button class="btn" data-demote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">➡</button>` : `<span></span>`;
+    const leftBtn = (hKey!=="week") ? `<button class="btn" data-demote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">⬅</button>` : `<span></span>`;
+    const rightBtn = (hKey!=="quarter") ? `<button class="btn" data-promote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">➡</button>` : `<span></span>`;
+    const delBtn = `<button class="btn bad" title="Delete goal" data-delete-goal="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">🗑</button>`;
     return `
       <div class="goal ${dClass}">
         <div class="domain-strip"></div>
@@ -1097,6 +1134,7 @@ function initLifeMap(){
             </div>
           </div>
           <div class="row" style="justify-content:flex-end; gap:8px">
+            ${delBtn}
             ${leftBtn}
             ${rightBtn}
           </div>
@@ -1270,13 +1308,10 @@ ${g.notes||""}`.trim(), createdAt: now, updatedAt: now };
   function moveGoal(id, hKey, domain, dir){
     const order = ["week","month","quarter"];
     const idx = order.indexOf(hKey);
-    if (idx < 0) return;
-
+    const target = dir==="promote" ? order[Math.max(0, idx-1)] : order[Math.min(order.length-1, idx+1)];
     // promote means toward week (more urgent): quarter -> month -> week
     const fromKey = hKey;
-    const toKey = (dir==="promote")
-      ? (idx === 0 ? fromKey : order[idx-1])
-      : (idx === order.length-1 ? fromKey : order[idx+1]);
+    const toKey = target;
 
     if(fromKey===toKey) return;
 
@@ -1365,8 +1400,7 @@ function initIncomeMap(){
       };
 
       st.threads.push(thread);
-      saveState(st);
-      renderFooter(st);
+      saveState();
       alert("Thread created in Thread Registry (domain: Income).");
     });
   });
@@ -1384,6 +1418,7 @@ function initIncomeMap(){
 document.addEventListener("DOMContentLoaded", ()=>{
   dbgRefresh();
   ensureTopbarNav();
+  ensureInternalLinksSelf();
   if (new URLSearchParams(location.search).get("debug") === "1") ensureDebugPanel();
   dbgRenderPanel();
   const page = (document.body.getAttribute("data-page")||"").toLowerCase();
@@ -1446,13 +1481,13 @@ function initMorningMap() {
     st.meta.systemNotesText = st.meta.morningMapText || DEFAULT_ORIENTATION_TEXT;
   }
   if (!st.meta.northStarText) {
-    st.meta.northStarText = `I’m building a peaceful, independent life with room to create and a stable home.
+    st.meta.northStarText = "I’m building a peaceful, independent life with room to create and a stable home.
 
 • No consumer debt
 • Clear housing path
 • Sustainable, sufficient income
 • Time and space for creative work
-• Health managed deliberately`;
+• Health managed deliberately";
   }
   // Back-compat
   if (!st.meta.morningMapText) st.meta.morningMapText = st.meta.systemNotesText;
@@ -1464,7 +1499,7 @@ function initMorningMap() {
   if (!st.meta.sparkNotes) st.meta.sparkNotes = '';
 
   // Thread list for dropdowns
-  const threads = (st.threads || []).filter(t => (t.status || "").toLowerCase() !== "archived");
+  const threads = (st.threads || []).filter(t => !t.archived);
   const threadOptions = ['<option value="">—</option>'].concat(
     threads.map(t => `<option value="${esc(t.id)}">${esc(t.title || '(untitled)')}</option>`)
   ).join('');
