@@ -1127,8 +1127,8 @@ function initLifeMap(){
     s.id = styleId;
     s.textContent = `
       /* Life Map: domain blocks (structure) vs goals (action) */
-      #lifeMapRoot .domain-block > .domain-strip { opacity: 1; }
-      #lifeMapRoot .goal > .domain-strip { opacity: 0.45; }
+      #lifeMapRoot .domain-block > .domain-strip { opacity: 1 !important; }
+      #lifeMapRoot .goal > .domain-strip { opacity: 0.45 !important; }
     `;
     document.head.appendChild(s);
   })();
