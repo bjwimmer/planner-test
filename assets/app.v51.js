@@ -1176,8 +1176,8 @@ function initLifeMap(){
     const notesLines = (g.notes||"").split("\n").filter(x=>x.trim());
     const mini = notesLines.slice(0,3).map(x=>`<li>${escapeHtml(x)}</li>`).join("");
     const more = notesLines.length>3 ? `<div class="small">+${notesLines.length-3} more</div>` : "";
-    const leftBtn = (hKey!=="week") ? `<button class="btn" data-demote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">⬅</button>` : `<span></span>`;
-    const rightBtn = (hKey!=="quarter") ? `<button class="btn" data-promote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">➡</button>` : `<span></span>`;
+    const leftBtn = (hKey!=="week") ? `<button class="btn" data-promote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">⬅</button>` : `<span></span>`;
+    const rightBtn = (hKey!=="quarter") ? `<button class="btn" data-demote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">➡</button>` : `<span></span>`;
     return `
       <div class="goal ${dClass}" data-goal-card="${g.id}">
         <div class="domain-strip"></div>
