@@ -1578,13 +1578,13 @@ function initMorningMap() {
     st.meta.systemNotesText = st.meta.morningMapText || DEFAULT_ORIENTATION_TEXT;
   }
   if (!st.meta.northStarText) {
-    st.meta.northStarText = "I’m building a peaceful, independent life with room to create and a stable home.
+    st.meta.northStarText = `I’m building a peaceful, independent life with room to create and a stable home.
 
 • No consumer debt
 • Clear housing path
 • Sustainable, sufficient income
 • Time and space for creative work
-• Health managed deliberately";
+• Health managed deliberately`;
   }
   // Back-compat
   if (!st.meta.morningMapText) st.meta.morningMapText = st.meta.systemNotesText;
