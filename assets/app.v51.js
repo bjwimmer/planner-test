@@ -1074,6 +1074,20 @@ function initLifeMap(){
   const root = document.querySelector("#lifeMapRoot");
   if(!root) return;
 
+  // Visual hierarchy: make nested goal stripes lighter than domain stripes (all domains).
+  (function(){
+    const styleId = "lifeMapStripeOpacity";
+    if(document.getElementById(styleId)) return;
+    const s = document.createElement("style");
+    s.id = styleId;
+    s.textContent = `
+      /* Life Map: domain blocks (structure) vs goals (action) */
+      #lifeMapRoot .domain-block > .domain-strip { opacity: 1; }
+      #lifeMapRoot .goal > .domain-strip { opacity: 0.45; }
+    `;
+    document.head.appendChild(s);
+  })();
+
   const horizons = ["week","month","quarter"];
   const domains = st.lifeMap.domains;
 
@@ -1362,8 +1376,7 @@ function initIncomeMap(){
       };
 
       st.threads.push(thread);
-      saveState(st);
-      renderFooter(st);
+      saveState();
       alert("Thread created in Thread Registry (domain: Income).");
     });
   });
@@ -1443,13 +1456,13 @@ function initMorningMap() {
     st.meta.systemNotesText = st.meta.morningMapText || DEFAULT_ORIENTATION_TEXT;
   }
   if (!st.meta.northStarText) {
-    st.meta.northStarText = `I’m building a peaceful, independent life with room to create and a stable home.
+    st.meta.northStarText = "I’m building a peaceful, independent life with room to create and a stable home.
 
 • No consumer debt
 • Clear housing path
 • Sustainable, sufficient income
 • Time and space for creative work
-• Health managed deliberately`;
+• Health managed deliberately";
   }
   // Back-compat
   if (!st.meta.morningMapText) st.meta.morningMapText = st.meta.systemNotesText;
@@ -1461,7 +1474,7 @@ function initMorningMap() {
   if (!st.meta.sparkNotes) st.meta.sparkNotes = '';
 
   // Thread list for dropdowns
-  const threads = (st.threads || []).filter(t => (t.status || "").toLowerCase() !== "archived");
+  const threads = (st.threads || []).filter(t => !t.archived);
   const threadOptions = ['<option value="">—</option>'].concat(
     threads.map(t => `<option value="${esc(t.id)}">${esc(t.title || '(untitled)')}</option>`)
   ).join('');
