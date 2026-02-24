@@ -1,4 +1,4 @@
-const BUILD_VERSION = "v50-live";
+const BUILD_VERSION = "v51-test";
 const DEFAULT_ORIENTATION_TEXT = "Planner Orientation Layer \u2014 Implementation Blueprint v1.0\n\nThis document defines the calm, structured, orientation-first homepage layer for the existing planner system. It is an additive front-layer, not a rebuild. All existing planner pages and logic remain intact.\n\nCore Design Intent\n\nTone: Relaxed, creative, open.\nEmotional Effect: Structured stillness.\nFunction: Orientation before execution.\nRule: One continuous vertical layout. No collapsible sections above the fold.\n\nHomepage Structure (Top to Bottom)\n\n1. NORTH STAR (Locked Section)\n\nAnchoring Sentence (locked, editable only during scheduled review):\n\n\u201cI finish my life in peace \u2014 no debt left behind, no burden passed forward, living comfortably enough to create and care for myself.\u201d\n\nPractical Bullet Conditions (locked):\n\n\u2022 No consumer debt.\n\n\u2022 Housing path resolved and documented.\n\n\u2022 Home simplified and document-ready.\n\n\u2022 Income baseline stable with protected creative time.\n\n2. 90-DAY GATE (Current Season)\n\nHeader format: By [Insert Date]\n\n\u2022 Housing decision path chosen.\n\n\u2022 Debt strategy documented and active.\n\n\u2022 Minimum viable home clear established.\n\n3. THIS WEEK (Maximum 3 Commitments)\n\nOnly 1\u20133 commitments allowed. Each must have a clear 'done' definition.\n\nExample placeholders:\n\n\u2022 [Commitment 1]\n\n\u2022 [Commitment 2]\n\n\u2022 [Commitment 3]\n\n4. TODAY (One Lever Only)\n\nSingle action that advances one weekly commitment. No additional task lists visible on homepage.\n\nNavigation Rules\n\nAll deeper planner pages remain intact.\nA simple 'Home' link is added to each deeper page.\nHomepage remains the browser default start page.\nNo metrics, widgets, progress bars, or dashboards added.\n\nVisual Tone Guidelines\n\nBackground: Warm cream or soft neutral.\nText: Dark slate or charcoal (not pure black).\nAccent hierarchy:\n\u2022 Deep muted teal for North Star.\n\u2022 Warm clay/amber for 90-Day Gate.\n\u2022 Soft sage or gray-blue for Weekly.\n\u2022 Subtle highlight for Today.\nTypography: Soft serif for headings; clean sans-serif for body.\n\nGuardrails\n\n\u2022 Homepage must fit on one screen without scrolling.\n\u2022 North Star text remains locked except during scheduled review.\n\u2022 No new sections added without revisiting structure intentionally.\n\u2022 This page serves orientation, not tracking.";
 
 
@@ -157,8 +157,8 @@ window.addEventListener("unhandledrejection", (ev)=>{ dbgAddError(ev.reason || "
 
 // Planner (Thread System) - localStorage-first, plus optional GitHub Gist sync.
 
-const STORE_KEY = "planner.data.v1";
-const SYNC_KEY  = "planner.sync.v1"; // {gistId, token, autoPull:true}
+const STORE_KEY = "planner-test.data.v1";
+const SYNC_KEY  = "planner-test.sync.v1"; // {gistId, token, autoPull:true}
 const AUTO_PULL_SESSION_KEY = "planner.autoPulled.v1";
 const GIST_FILENAME = "planner-data.json";
 
@@ -1438,9 +1438,20 @@ function initMorningMap() {
 
   // Defaults
   st.meta = st.meta || {};
-  if (!st.meta.morningMapText) {
-    st.meta.morningMapText = DEFAULT_ORIENTATION_TEXT;
+  if (!st.meta.systemNotesText) {
+    st.meta.systemNotesText = st.meta.morningMapText || DEFAULT_ORIENTATION_TEXT;
   }
+  if (!st.meta.northStarText) {
+    st.meta.northStarText = "I’m building a peaceful, independent life with room to create and a stable home.
+
+• No consumer debt
+• Clear housing path
+• Sustainable, sufficient income
+• Time and space for creative work
+• Health managed deliberately";
+  }
+  // Back-compat
+  if (!st.meta.morningMapText) st.meta.morningMapText = st.meta.systemNotesText;
   if (!st.meta.morningScratch) st.meta.morningScratch = '';
   if (!st.meta.ignitionIntent) st.meta.ignitionIntent = '';
   if (!st.meta.ignitionFirstMove) st.meta.ignitionFirstMove = '';
@@ -1485,18 +1496,34 @@ function initMorningMap() {
             Orientation layer
             <button class="helpIcon" data-pop="This is your steadying layer. Don’t optimize it daily. Edit during a scheduled review, then leave it alone.">?</button>
           </div>
-          <button class="btn" id="mmReset">Reset</button>
+          
         </div>
 
-        <textarea id="mmText" class="bigText" spellcheck="false">${esc(st.meta.morningMapText)}</textarea>
-
-        <div class="row">
-          <button class="btn primary" id="mmSave">Save</button>
-          <div class="small muted">Stored locally in your browser.</div>
+        <div class="northStarCard">
+          <div class="h2" style="margin-bottom:6px">North Star</div>
+          <div id="nsPreview" class="nsPreview"></div>
+          <textarea id="nsText" class="nsText" spellcheck="false">${esc(st.meta.northStarText)}</textarea>
+          <div class="row" style="margin-top:10px">
+            <button class="btn primary" id="nsSave">Save</button>
+            <button class="btn" id="nsReset">Reset</button>
+            <div class="small muted">Keep this short. Read it in 5 seconds.</div>
+          </div>
         </div>
-      </div>
 
-      <div class="stack">
+        <div class="spacer"></div>
+
+        <div class="card">
+          <div class="row" style="justify-content:space-between; align-items:center">
+            <div class="h2">System Notes (optional)</div>
+            <div class="small muted">Scroll-only reference. Not part of your daily view.</div>
+          </div>
+          <textarea id="notesText" class="notesText" spellcheck="false">${esc(st.meta.systemNotesText)}</textarea>
+          <div class="row">
+            <button class="btn" id="notesSave">Save</button>
+            <button class="btn" id="notesReset">Reset</button>
+          </div>
+        </div>
+<div class="stack">
         <div class="card">
           <div class="h2">
             Focus strip
@@ -1613,13 +1640,37 @@ function initMorningMap() {
   // Save handlers
   const saveAll = () => saveState(st);
 
-  document.getElementById('mmSave')?.addEventListener('click', () => {
-    st.meta.morningMapText = document.getElementById('mmText').value;
+  const updatePreview = () => {
+    const t = document.getElementById('nsText')?.value || '';
+    const first = (t.split('\n').find(l => l.trim()) || '').trim();
+    const prev = document.getElementById('nsPreview');
+    if (prev) prev.textContent = first;
+  };
+  updatePreview();
+  document.getElementById('nsText')?.addEventListener('input', updatePreview);
+
+  document.getElementById('nsSave')?.addEventListener('click', () => {
+    st.meta.northStarText = document.getElementById('nsText').value;
+    // keep back-compat field around
+    if (!st.meta.systemNotesText) st.meta.systemNotesText = st.meta.morningMapText || DEFAULT_ORIENTATION_TEXT;
+    saveAll(); toast('Saved');
+    updatePreview();
+  });
+
+  document.getElementById('nsReset')?.addEventListener('click', () => {
+    document.getElementById('nsText').value = "I’m building a peaceful, independent life with room to create and a stable home.\n\n• No consumer debt\n• Clear housing path\n• Sustainable, sufficient income\n• Time and space for creative work\n• Health managed deliberately";
+    updatePreview();
+  });
+
+  document.getElementById('notesSave')?.addEventListener('click', () => {
+    st.meta.systemNotesText = document.getElementById('notesText').value;
+    // back-compat
+    st.meta.morningMapText = st.meta.systemNotesText;
     saveAll(); toast('Saved');
   });
 
-  document.getElementById('mmReset')?.addEventListener('click', () => {
-    document.getElementById('mmText').value = DEFAULT_ORIENTATION_TEXT;
+  document.getElementById('notesReset')?.addEventListener('click', () => {
+    document.getElementById('notesText').value = DEFAULT_ORIENTATION_TEXT;
   });
 
   document.getElementById('mmScratchSave')?.addEventListener('click', () => {

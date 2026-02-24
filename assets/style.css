@@ -453,3 +453,40 @@ html[data-color="plus"] .card::before{
 .quicklinksGrid{display:flex;flex-wrap:wrap;gap:10px;}
 .btn.big{padding:12px 14px;border-radius:14px;}
 .btn.big{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;}
+
+
+/* North Star (Orientation Layer) */
+.northStarCard{
+  background:#ffffff;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 10px 26px rgba(0,0,0,.06);
+}
+.nsPreview{
+  font-size:22px;
+  font-weight:600;
+  color:#2f5fb3;
+  line-height:1.35;
+  margin:4px 0 10px;
+}
+.nsText{
+  width:100%;
+  min-height:120px;
+  font-size:16px;
+  line-height:1.5;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.12);
+}
+.notesText{
+  width:100%;
+  min-height:260px;
+  font-size:14px;
+  line-height:1.5;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.12);
+  color:#111;
+}
+.spacer{height:14px;}
