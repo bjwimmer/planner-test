@@ -735,6 +735,15 @@ function initQuickCapture(){
   dbgMarkInit('common');
   const st = initCommon();
 
+  (function(){
+    const styleId = "threadRegistryFocusGlow";
+    if(document.getElementById(styleId)) return;
+    const s = document.createElement("style");
+    s.id = styleId;
+    s.textContent = `.focus-glow { outline: 3px solid rgba(255, 180, 0, .55); border-radius: 14px; }`;
+    document.head.appendChild(s);
+  })();
+
   const form = document.querySelector("#captureForm");
   const input = document.querySelector("#captureText");
   const list = document.querySelector("#inboxList");
@@ -813,6 +822,8 @@ function initThreadRegistry(){
   const inboxEl = document.querySelector("#registryInbox");
   const threadsEl = document.querySelector("#threadsList");
   const form = document.querySelector("#newThreadForm");
+
+  const focusThreadId = new URLSearchParams(location.search).get("focusThread");
 
   // --- Add thread UX: disable submit until title has text ---
   const addBtn = form ? form.querySelector('button[type="submit"]') : null;
@@ -924,6 +935,25 @@ function initThreadRegistry(){
   }
 
   function renderThreads(){
+    function threadBacklinks(threadId){
+      const links = [];
+      const lm = st.lifeMap;
+      if(!lm || !lm.horizons) return links;
+      for(const [hKey,h] of Object.entries(lm.horizons)){
+        for(const domain of (lm.domains||[])){
+          const list = h.domains?.[domain] || [];
+          for(const g of list){
+            const ids = Array.isArray(g.linkedThreadIds) ? g.linkedThreadIds : (g.threadId?[g.threadId]:[]);
+            if(ids.map(String).includes(String(threadId))){
+              links.push({ hKey, hLabel: h.label, domain, goalId: g.id, goalTitle: g.title });
+            }
+          }
+        }
+      }
+      return links;
+    }
+
+
     const activeThreads = st.threads
       .filter(t=>t.status!=="archived")
       .sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
@@ -932,7 +962,7 @@ function initThreadRegistry(){
       const inSlot = (String(st.weekly.slot1)===String(t.id) || String(st.weekly.slot2)===String(t.id));
       const pill = inSlot ? `<span class="pill good">Active this week</span>` : `<span class="pill">Backlog</span>`;
       return `
-        <div class="item ${domainClass(t.domain)}">
+        <div class="item ${domainClass(t.domain)}" data-thread-card="${t.id}" id="thread-${t.id}">
           <div class="domain-strip"></div>
           <strong>${escapeHtml(t.title)}</strong>
           <div class="meta">
@@ -940,6 +970,7 @@ function initThreadRegistry(){
             ${t.domain ? `<span class="pill">${escapeHtml(t.domain)}</span>` : ``}
             <span class="mono">Updated: ${new Date(t.updatedAt).toLocaleString()}</span>
           </div>
+          ${(() => { const links = threadBacklinks(t.id); if(!links.length) return ``; const items = links.map(l=>`<a href="strategic-life-map.html?focusGoal=${encodeURIComponent(l.goalId)}" data-jump-goal="${escapeAttr(l.goalId)}" class="small" style="margin-right:10px">Linked: ${escapeHtml(l.domain)} → ${escapeHtml(l.goalTitle)} (${escapeHtml(l.hLabel)})</a>`).join(""); return `<div class="meta" style="margin-top:6px; flex-wrap:wrap">${items}</div>`; })()}
 
           <div class="grid" style="margin-top:10px">
             <div>
@@ -970,7 +1001,18 @@ function initThreadRegistry(){
       `;
     }).join("") : `<p class="small">No threads yet. Create one below, or process the inbox.</p>`;
 
-    threadsEl.querySelectorAll("[data-save]").forEach(btn=>{
+    
+    // Focus a specific thread if requested via URL (thread-registry.html?focusThread=ID)
+    if(focusThreadId){
+      const el = threadsEl.querySelector(`[data-thread-card="${cssEscape(focusThreadId)}"]`);
+      if(el){
+        el.scrollIntoView({behavior:"smooth", block:"center"});
+        el.classList.add("focus-glow");
+        setTimeout(()=>el.classList.remove("focus-glow"), 1800);
+      }
+    }
+
+threadsEl.querySelectorAll("[data-save]").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const id = btn.getAttribute("data-save");
         const th = st.threads.find(x=>String(x.id)===String(id));
@@ -1074,6 +1116,9 @@ function initLifeMap(){
   const root = document.querySelector("#lifeMapRoot");
   if(!root) return;
 
+  const focusGoalId = new URLSearchParams(location.search).get("focusGoal");
+  let focusGoalDone = false;
+
   // Visual hierarchy: make nested goal stripes lighter than domain stripes (all domains).
   (function(){
     const styleId = "lifeMapStripeOpacity";
@@ -1091,6 +1136,35 @@ function initLifeMap(){
   const horizons = ["week","month","quarter"];
   const domains = st.lifeMap.domains;
 
+  function threadLinksHtml(g){
+    const ids = Array.isArray(g.linkedThreadIds) ? g.linkedThreadIds : [];
+    if(!ids.length) return '';
+    const threads = ids.map(id => st.threads.find(t => String(t.id)===String(id))).filter(Boolean);
+    if(!threads.length) return '';
+    const pills = threads.map(t=>`<button class="pill" type="button" data-open-thread="${escapeAttr(t.id)}" title="Open in Thread Registry">🧵 ${escapeHtml(t.title)}</button>`).join(" ");
+    return `<div class="meta" style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap">${pills}</div>`;
+  }
+
+  function attachThreadPickerHtml(g){
+    const ids = new Set(Array.isArray(g.linkedThreadIds) ? g.linkedThreadIds.map(String) : []);
+    const options = st.threads
+      .filter(t=>t.status!=="archived")
+      .filter(t=>!ids.has(String(t.id)))
+      .map(t=>`<option value="${escapeAttr(t.id)}">${escapeHtml(t.title)}</option>`)
+      .join("");
+    if(!options) return '';
+    return `
+      <div style="margin-top:8px">
+        <label class="small">Attach existing thread</label>
+        <div class="row" style="gap:8px">
+          <select data-attach-thread-select="${escapeAttr(g.id)}">${options}</select>
+          <button class="btn" type="button" data-attach-thread="${escapeAttr(g.id)}">Attach</button>
+        </div>
+      </div>
+    `;
+  }
+
+
   function goalRow(hKey, domain, g){
     const dClass = domainClass(domain);
     const urgency = g.urgency || st.lifeMap.defaultUrgency || "medium";
@@ -1100,7 +1174,7 @@ function initLifeMap(){
     const leftBtn = (hKey!=="week") ? `<button class="btn" data-demote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">⬅</button>` : `<span></span>`;
     const rightBtn = (hKey!=="quarter") ? `<button class="btn" data-promote="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">➡</button>` : `<span></span>`;
     return `
-      <div class="goal ${dClass}">
+      <div class="goal ${dClass}" data-goal-card="${g.id}">
         <div class="domain-strip"></div>
         <div class="goal-head">
           <div>
@@ -1108,6 +1182,7 @@ function initLifeMap(){
             <div class="meta">
               <!-- Urgency is edited via the dropdown below; keep the header clean to reduce visual noise. -->
               <span class="pill">${escapeHtml(domain)}</span>
+              ${threadLinksHtml(g)}
             </div>
           </div>
           <div class="row" style="justify-content:flex-end; gap:8px">
@@ -1133,6 +1208,7 @@ function initLifeMap(){
             <button class="btn primary" data-save-goal="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">Save</button>
             <div style="height:8px"></div>
             <button class="btn good" data-thread-from-goal="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">🧵 Create Thread</button>
+            ${attachThreadPickerHtml(g)}
             <div style="height:8px"></div>
             <button class="btn bad" data-delete-goal="${g.id}" data-h="${hKey}" data-d="${escapeAttr(domain)}">Delete</button>
           </div>
@@ -1269,6 +1345,52 @@ ${g.notes||""}`.trim(), createdAt: now, updatedAt: now };
         saveState(st); renderFooter(st); render();
         alert("Thread created. Go to Thread Registry to work it.");
       });
+    // Open a linked thread in Thread Registry
+    root.querySelectorAll("[data-open-thread]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const tid = btn.getAttribute("data-open-thread");
+        if(!tid) return;
+        location.href = `thread-registry.html?focusThread=${encodeURIComponent(tid)}`;
+      });
+    });
+
+    // Attach an existing thread to this goal (supports multiple threads per goal)
+    root.querySelectorAll("[data-attach-thread]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const goalId = btn.getAttribute("data-attach-thread");
+        const sel = root.querySelector(`[data-attach-thread-select="${cssEscape(goalId)}"]`);
+        const tid = sel ? sel.value : "";
+        if(!tid) return;
+        // Find goal by searching all horizons/domains
+        let g = null;
+        for(const hk of horizons){
+          for(const d of domains){
+            g = findGoal(hk, d, goalId);
+            if(g) break;
+          }
+          if(g) break;
+        }
+        if(!g) return;
+        g.linkedThreadIds = Array.isArray(g.linkedThreadIds) ? g.linkedThreadIds : [];
+        if(!g.linkedThreadIds.map(String).includes(String(tid))){
+          g.linkedThreadIds.unshift(tid);
+          g.updatedAt = nowIso();
+          saveState(st); renderFooter(st); render();
+        }
+      });
+    });
+
+    // If we were navigated here to focus a particular goal, scroll + highlight once.
+    if(focusGoalId && !focusGoalDone){
+      const el = root.querySelector(`[data-goal-card="${cssEscape(focusGoalId)}"]`);
+      if(el){
+        focusGoalDone = true;
+        el.scrollIntoView({behavior:"smooth", block:"center"});
+        el.classList.add("focus-glow");
+        setTimeout(()=>el.classList.remove("focus-glow"), 1800);
+      }
+    }
+
     });
   }
 
