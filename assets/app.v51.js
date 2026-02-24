@@ -1362,7 +1362,8 @@ function initIncomeMap(){
       };
 
       st.threads.push(thread);
-      saveState();
+      saveState(st);
+      renderFooter(st);
       alert("Thread created in Thread Registry (domain: Income).");
     });
   });
@@ -1442,13 +1443,13 @@ function initMorningMap() {
     st.meta.systemNotesText = st.meta.morningMapText || DEFAULT_ORIENTATION_TEXT;
   }
   if (!st.meta.northStarText) {
-    st.meta.northStarText = "I’m building a peaceful, independent life with room to create and a stable home.
+    st.meta.northStarText = `I’m building a peaceful, independent life with room to create and a stable home.
 
 • No consumer debt
 • Clear housing path
 • Sustainable, sufficient income
 • Time and space for creative work
-• Health managed deliberately";
+• Health managed deliberately`;
   }
   // Back-compat
   if (!st.meta.morningMapText) st.meta.morningMapText = st.meta.systemNotesText;
@@ -1460,7 +1461,7 @@ function initMorningMap() {
   if (!st.meta.sparkNotes) st.meta.sparkNotes = '';
 
   // Thread list for dropdowns
-  const threads = (st.threads || []).filter(t => !t.archived);
+  const threads = (st.threads || []).filter(t => (t.status || "").toLowerCase() !== "archived");
   const threadOptions = ['<option value="">—</option>'].concat(
     threads.map(t => `<option value="${esc(t.id)}">${esc(t.title || '(untitled)')}</option>`)
   ).join('');
