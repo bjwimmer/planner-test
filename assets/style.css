@@ -490,3 +490,60 @@ html[data-color="plus"] .card::before{
   color:#111;
 }
 .spacer{height:14px;}
+
+/* === Arrow buttons (Life Map horizon move) === */
+.arrow-btn {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  white-space: nowrap;
+  letter-spacing: .2px;
+  border-radius: 10px;
+  line-height: 1.2;
+  min-width: 72px;
+}
+
+/* === Thread link pills with status badge (Life Map) === */
+.thread-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.thread-link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(37,99,235,.30);
+  background: rgba(239,246,255,.80);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 100%;
+  transition: box-shadow .12s, transform .12s;
+}
+.thread-link-pill:hover {
+  box-shadow: 0 6px 16px rgba(37,99,235,.18);
+  transform: translateY(-1px);
+}
+.tlp-icon  { flex-shrink: 0; }
+.tlp-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  color: #1e40af;
+}
+.tlp-status {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tls-active  { background: rgba(37,99,235,.15);  color: #1d4ed8; border: 1px solid rgba(37,99,235,.30); }
+.tls-paused  { background: rgba(217,119,6,.14);  color: #92400e; border: 1px solid rgba(217,119,6,.35); }
+.tls-done    { background: rgba(5,150,105,.14);  color: #065f46; border: 1px solid rgba(5,150,105,.35); }
+.tls-idle    { background: rgba(148,163,184,.18);color: #475569; border: 1px solid rgba(148,163,184,.40); }
