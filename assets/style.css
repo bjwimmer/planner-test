@@ -561,3 +561,15 @@ html[data-color="plus"] .card::before{
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ===== Build Stamp ===== */
+#build-stamp {
+  position: fixed;
+  bottom: 10px;
+  right: 14px;
+  font-size: 12px;
+  opacity: 0.5;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
