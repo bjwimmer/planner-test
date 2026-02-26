@@ -286,6 +286,20 @@ html[data-color="plus"] .card::before{
   align-items:center;
   margin-bottom:10px;
 }
+
+/* Make domain names MUCH more visible */
+.domain-head strong {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.domain-health strong { color: rgb(5,150,105); }
+.domain-home strong { color: rgb(217,119,6); }
+.domain-work-income strong { color: rgb(37,99,235); }
+.domain-relationships strong { color: rgb(236,72,153); }
+.domain-creative-meaning strong { color: rgb(124,58,237); }
+.domain-other strong { color: rgb(100,116,139); }
 .mini-input{
   width: 220px;
   max-width: 44vw;
@@ -560,22 +574,4 @@ html[data-color="plus"] .card::before{
   #threadsList.list {
     grid-template-columns: 1fr;
   }
-}
-
-
-/* ===== Build Stamp ===== */
-#build-stamp {
-  position: fixed;
-  bottom: 14px;
-  right: 18px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #000;
-  background: rgba(255, 240, 200, 0.9);
-  padding: 6px 10px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  letter-spacing: 0.4px;
-  pointer-events: none;
-  z-index: 99999;
 }
