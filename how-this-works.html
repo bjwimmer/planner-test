@@ -6,17 +6,17 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>How This Works · Planner</title>
+  <title>90-Day Income Map · Planner</title>
   <link rel="icon" href="favicon.ico"/>
   <link rel="stylesheet" href="assets/style.css?v=53"/>
 </head>
-<body data-page="overview">
+<body data-page="income">
   <div class="topbar">
     <div class="container">
       <div class="row" style="justify-content:space-between">
         <div class="brand">
-          <span style="font-size:20px">📜</span>
-          <span>How This Works</span>
+          <span style="font-size:20px">📈</span>
+          <span>90-Day Income Map</span>
           <span class="badge" data-sync-indicator>• Not connected</span>
           <span class="badge" data-build></span>
         </div>
@@ -31,8 +31,8 @@
       <div class="nav">
         <a data-nav href="index.html">Map</a>
         <a data-nav href="quick-capture.html">⚡ Quick Capture</a>
-        <a data-nav href="thread-registry.html">Thread Registry</a>
         <a data-nav href="strategic-life-map.html">Strategic Life Map</a>
+        <a data-nav href="thread-registry.html">Thread Registry</a>
         <a data-nav href="90-day-income-map.html">90‑Day Income Map</a>
         <a data-nav href="how-this-works.html">How This Works</a>
       </div>
@@ -40,25 +40,26 @@
   </div>
 
   <div class="container">
-    <div class="card">
-      <h2>30-second version</h2>
-      <div class="list">
-        <div class="item"><strong>1) Capture everything fast</strong><p class="small">If it's in your head, it's stealing RAM.</p></div>
-        <div class="item"><strong>2) Only two active threads per week</strong><p class="small">Constraint beats guilt.</p></div>
-        <div class="item"><strong>3) Every thread must have a next micro-action</strong><p class="small">If it's not 5–20 minutes, it's still fog.</p></div>
-        <div class="item"><strong>4) Big-picture pages are scheduled</strong><p class="small">No "strategic thinking" as avoidance.</p></div>
-        <div class="item"><strong>5) Sync + Export</strong><p class="small">Auto-pull keeps devices aligned. Manual push prevents accidental overwrite.</p></div>
+    <div class="grid">
+      <div class="card">
+        <h2>Start date</h2>
+        <p class="kicker">Set your medical leave (or plan) start date. The system computes your current week.</p>
+        <label>Start date</label>
+        <input id="startDate" type="date"/>
+        <hr/>
+        <div class="item">
+          <strong>Where you are now</strong>
+          <div class="meta">
+            <span class="pill good" id="weekNow"></span>
+          </div>
+          <p class="small">Use this to reduce uncertainty. The week is a fact, not a mood.</p>
+        </div>
       </div>
-      <hr/>
-      <h2>How you'll actually use it</h2>
-      <ul style="color:var(--muted); line-height:1.6">
-        <li><strong>On phone:</strong> Quick Capture. (Then Push when you want it synced.)</li>
-        <li><strong>On desktop:</strong> Registry + writing longer notes. (Then Push.)</li>
-        <li><strong>Before switching devices:</strong> Push on the device you just used.</li>
-      </ul>
-      <hr/>
-      <h3>Security note</h3>
-      <p class="small">Your GitHub token is stored only in this browser on this device. Use a fine-grained token limited to Gists.</p>
+      <div class="card">
+        <h2>Escalation checkpoints</h2>
+        <p class="kicker">These are rules — so you don't renegotiate the same fear every week.</p>
+        <div id="checkpoints" class="list"></div>
+      </div>
     </div>
     <div class="footer" data-footer></div>
   </div>
