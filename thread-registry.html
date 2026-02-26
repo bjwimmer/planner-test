@@ -6,18 +6,17 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Strategic Life Map · Planner</title>
+  <title>Thread Registry · Planner</title>
   <link rel="icon" href="favicon.ico"/>
   <link rel="stylesheet" href="assets/style.css?v=53"/>
-  <link rel="stylesheet" href="assets/widen.css?v=53"/>
 </head>
-<body data-page="lifemap">
+<body data-page="registry">
   <div class="topbar">
     <div class="container">
       <div class="row" style="justify-content:space-between">
         <div class="brand">
-          <span style="font-size:20px">🧭</span>
-          <span>Strategic Life Map</span>
+          <span style="font-size:20px">🧵</span>
+          <span>Thread Registry</span>
           <span class="badge" data-sync-indicator>• Not connected</span>
           <span class="badge" data-build></span>
         </div>
@@ -41,11 +40,65 @@
   </div>
 
   <div class="container">
-    <div class="card">
-      <h2>Strategic Life Map</h2>
-      <p class="kicker">Your big-picture structure lives here. Default landing: <strong>3 Months</strong>. Promote goals forward as they become urgent.</p>
-      <div id="lifeMapRoot"></div>
+    <div class="grid">
+      <div class="card">
+        <h2>This week's runway</h2>
+        <p class="kicker">Only two active threads. The rest can wait without dying.</p>
+        <div class="item">
+          <div class="meta">
+            <span class="pill" data-build></span>
+            <span class="mono" id="weekOf"></span>
+          </div>
+          <div class="grid" style="margin-top:10px">
+            <div>
+              <label>Weekly Slot #1</label>
+              <select id="slot1"></select>
+            </div>
+            <div>
+              <label>Weekly Slot #2</label>
+              <select id="slot2"></select>
+            </div>
+          </div>
+        </div>
+        <hr/>
+        <h3>Create a thread</h3>
+        <form id="newThreadForm">
+          <label>Thread title</label>
+          <input id="tTitle" placeholder="Example: 'Med leave paperwork' or 'Etsy: 3 new listings'"/>
+          <div class="grid">
+            <div>
+              <label>Domain (optional)</label>
+              <select id="tDomain"></select>
+            </div>
+            <div>
+              <label>Next micro-action (5–20 min)</label>
+              <input id="tNext" placeholder="Example: Open doc and write 5 bullets"/>
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn primary" type="submit">Add thread</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Inbox processing</h2>
+        <p class="kicker">Turn noise into structure. Or archive it and move on.</p>
+        <div id="registryInbox" class="list"></div>
+      </div>
     </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h2>Threads</h2>
+        <label class="small" style="display:flex; align-items:center; gap:8px; user-select:none">
+          <input type="checkbox" data-toggle-archived />
+          Show archived
+        </label>
+      </div>
+      <div id="threadsList" class="list"></div>
+    </div>
+
     <div class="footer" data-footer></div>
   </div>
 

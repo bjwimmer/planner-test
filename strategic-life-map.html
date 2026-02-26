@@ -6,17 +6,18 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Quick Capture · Planner</title>
+  <title>Strategic Life Map · Planner</title>
   <link rel="icon" href="favicon.ico"/>
   <link rel="stylesheet" href="assets/style.css?v=53"/>
+  <link rel="stylesheet" href="assets/widen.css?v=53"/>
 </head>
-<body data-page="quick">
+<body data-page="lifemap">
   <div class="topbar">
     <div class="container">
       <div class="row" style="justify-content:space-between">
         <div class="brand">
-          <span style="font-size:20px">⚡</span>
-          <span>Quick Capture</span>
+          <span style="font-size:20px">🧭</span>
+          <span>Strategic Life Map</span>
           <span class="badge" data-sync-indicator>• Not connected</span>
           <span class="badge" data-build></span>
         </div>
@@ -40,25 +41,10 @@
   </div>
 
   <div class="container">
-    <div class="grid">
-      <div class="card">
-        <h2>Capture (no decisions)</h2>
-        <p class="kicker">One line is enough. This is an inbox, not a life verdict.</p>
-        <form id="captureForm">
-          <label>What's in your head?</label>
-          <input id="captureText" placeholder="Example: 'Call insurance about…' or 'Design idea: …'"/>
-          <div class="row" style="margin-top:10px">
-            <button class="btn primary" type="submit">Add to inbox</button>
-            <a class="btn" href="thread-registry.html">Go process → Registry</a>
-          </div>
-        </form>
-        <hr/>
-        <button class="btn warn" id="archiveAll">Archive all inbox items</button>
-      </div>
-      <div class="card">
-        <h2>Inbox</h2>
-        <div id="inboxList" class="list"></div>
-      </div>
+    <div class="card">
+      <h2>Strategic Life Map</h2>
+      <p class="kicker">Your big-picture structure lives here. Default landing: <strong>3 Months</strong>. Promote goals forward as they become urgent.</p>
+      <div id="lifeMapRoot"></div>
     </div>
     <div class="footer" data-footer></div>
   </div>
