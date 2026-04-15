@@ -1,4 +1,4 @@
-const BUILD_VERSION = "v53";
+const BUILD_VERSION = "";
 const DEFAULT_ORIENTATION_TEXT = "Planner Orientation Layer — Implementation Blueprint v1.0\n\nThis document defines the calm, structured, orientation-first homepage layer for the existing planner system. It is an additive front-layer, not a rebuild. All existing planner pages and logic remain intact.\n\nCore Design Intent\n\nTone: Relaxed, creative, open.\nEmotional Effect: Structured stillness.\nFunction: Orientation before execution.\nRule: One continuous vertical layout. No collapsible sections above the fold.\n\nHomepage Structure (Top to Bottom)\n\n1. NORTH STAR (Locked Section)\n\nAnchoring Sentence (locked, editable only during scheduled review):\n\n\"I finish my life in peace — no debt left behind, no burden passed forward, living comfortably enough to create and care for myself.\"\n\nPractical Bullet Conditions (locked):\n\n• No consumer debt.\n\n• Housing path resolved and documented.\n\n• Home simplified and document-ready.\n\n• Income baseline stable with protected creative time.\n\n2. 90-DAY GATE (Current Season)\n\nHeader format: By [Insert Date]\n\n• Housing decision path chosen.\n\n• Debt strategy documented and active.\n\n• Minimum viable home clear established.\n\n3. THIS WEEK (Maximum 3 Commitments)\n\nOnly 1–3 commitments allowed. Each must have a clear 'done' definition.\n\nExample placeholders:\n\n• [Commitment 1]\n\n• [Commitment 2]\n\n• [Commitment 3]\n\n4. TODAY (One Lever Only)\n\nSingle action that advances one weekly commitment. No additional task lists visible on homepage.\n\nNavigation Rules\n\nAll deeper planner pages remain intact.\nA simple 'Home' link is added to each deeper page.\nHomepage remains the browser default start page.\nNo metrics, widgets, progress bars, or dashboards added.\n\nVisual Tone Guidelines\n\nBackground: Warm cream or soft neutral.\nText: Dark slate or charcoal (not pure black).\nAccent hierarchy:\n• Deep muted teal for North Star.\n• Warm clay/amber for 90-Day Gate.\n• Soft sage or gray-blue for Weekly.\n• Subtle highlight for Today.\nTypography: Soft serif for headings; clean sans-serif for body.\n\nGuardrails\n\n• Homepage must fit on one screen without scrolling.\n• North Star text remains locked except during scheduled review.\n• No new sections added without revisiting structure intentionally.\n• This page serves orientation, not tracking.";
 
 const DEFAULT_DOMAINS = ["Income","Financial","Home","Health","Relationships"];
@@ -10,14 +10,14 @@ const DEFAULT_TEST_GIST_ID = "4364e296d9592d9953ce71ee346a2766";
 function ensureTestDefaults() {
   try {
     let cfg = null;
-    const raw = localStorage.getItem("planner.sync.v1");
+    const raw = localStorage.getItem(SYNC_KEY);
     if (raw) {
       try { cfg = JSON.parse(raw); } catch(e) { cfg = {}; }
     } else {
       cfg = {};
     }
     if (!cfg.gistId) cfg.gistId = DEFAULT_TEST_GIST_ID;
-    localStorage.setItem("planner.sync.v1", JSON.stringify(cfg));
+    localStorage.setItem(SYNC_KEY, JSON.stringify(cfg));
   } catch(e) {}
 }
 
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 /* === end planner-test safeguards === */
 
-console.log('Planner build', BUILD_VERSION);
+
 
 function escHtml(s){
   return String(s ?? '')
@@ -74,16 +74,13 @@ function ensureTopbarNav(){
 
 // --- Debug ---
 window.__plannerDebug = window.__plannerDebug || {
-  build: BUILD_VERSION, page: null, inits: {}, errors: [], scriptSrc: [],
+  build: 'current', page: null, inits: {}, errors: [], scriptSrc: [],
 };
 
 function dbgRefresh(){
   try{
-    window.__plannerDebug.build = BUILD_VERSION;
     window.__plannerDebug.page = (document.body.getAttribute("data-page")||"").toLowerCase();
     window.__plannerDebug.scriptSrc = [...document.scripts].map(s=>s.src).filter(Boolean);
-    const badge = document.querySelector("[data-build]");
-    if(badge) badge.textContent = BUILD_VERSION;
   }catch(e){}
 }
 function dbgMarkInit(name){
@@ -292,6 +289,11 @@ function loadState(){
     if(!st.inbox) st.inbox = [];
     if(!st.threads) st.threads = [];
     if(!st.weekly) st.weekly = { slot1:null, slot2:null, weekOf:null };
+    if(st.weeklySlots && typeof st.weeklySlots === "object"){
+      st.weekly.slot1 = st.weekly.slot1 || st.weeklySlots.slot1 || null;
+      st.weekly.slot2 = st.weekly.slot2 || st.weeklySlots.slot2 || null;
+      delete st.weeklySlots;
+    }
     st.lifeMap = normalizeLifeMap(st.lifeMap);
     if(!st.incomeMap) st.incomeMap = { startDate:null };
     return st;
@@ -1448,8 +1450,8 @@ function initMorningMap(){
   const slot1El = document.getElementById('slot1');
   const slot2El = document.getElementById('slot2');
   const mvdEl   = document.getElementById('mvdThread');
-  if(slot1El) slot1El.value = st.weeklySlots?.slot1 || '';
-  if(slot2El) slot2El.value = st.weeklySlots?.slot2 || '';
+  if(slot1El) slot1El.value = st.weekly?.slot1 || '';
+  if(slot2El) slot2El.value = st.weekly?.slot2 || '';
   if(mvdEl)   mvdEl.value   = st.meta.mvdThreadId   || '';
 
   const updatePreview = ()=>{
@@ -1465,9 +1467,10 @@ function initMorningMap(){
   document.getElementById('mmScratchSave')?.addEventListener('click',()=>{ st.meta.morningScratch = document.getElementById('mmScratch').value; saveState(st); toast('Saved'); });
   document.getElementById('sparkSave')?.addEventListener('click',()=>{ st.meta.sparkNotes = document.getElementById('sparkNotes').value; saveState(st); toast('Saved'); });
   document.getElementById('slotsSave')?.addEventListener('click',()=>{
-    st.weeklySlots = st.weeklySlots || {};
-    st.weeklySlots.slot1 = document.getElementById('slot1').value;
-    st.weeklySlots.slot2 = document.getElementById('slot2').value;
+    st.weekly = st.weekly || { slot1:null, slot2:null, weekOf:null };
+    st.weekly.slot1 = document.getElementById('slot1').value || null;
+    st.weekly.slot2 = document.getElementById('slot2').value || null;
+    delete st.weeklySlots;
     saveState(st); toast('Saved');
   });
   document.getElementById('igSave')?.addEventListener('click',()=>{
@@ -1503,26 +1506,4 @@ document.addEventListener("DOMContentLoaded", ()=>{
   else                                         { dbgMarkInit('common');     initCommon();        }
 });
 
-document.addEventListener("DOMContentLoaded", ()=>{
-  try{ const el = document.querySelector("[data-build]"); if(el) el.textContent = BUILD_VERSION; }catch(e){}
-});
-
-
-// ===== BUILD STAMP =====
-function injectBuildStamp() {
-  // Avoid duplicates
-  if (document.getElementById("build-stamp")) return;
-
-  const stamp = document.createElement("div");
-  stamp.id = "build-stamp";
-  stamp.textContent = "Build " + (typeof BUILD_VERSION !== "undefined" ? BUILD_VERSION : "");
-  document.body.appendChild(stamp);
-}
-
-// If DOMContentLoaded already fired (fast load / cache), inject immediately.
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", injectBuildStamp);
-} else {
-  injectBuildStamp();
-}
 

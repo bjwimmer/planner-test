@@ -176,7 +176,7 @@ body[data-page="registry"] .topbar{ background: rgba(240,253,250,.88); }
 body[data-page="lifemap"] .topbar{ background: rgba(245,243,255,.88); }
 body[data-page="income"] .topbar{ background: rgba(239,246,255,.88); }
 body[data-page="home"] .topbar{ background: rgba(246,248,252,.88); }
-body[data-page="how"] .topbar{ background: rgba(248,250,252,.88); }
+body[data-page="overview"] .topbar{ background: rgba(248,250,252,.88); }
 /* Modal */
 .modal-backdrop{
   position:fixed; inset:0;
@@ -209,8 +209,8 @@ body[data-page="how"] .topbar{ background: rgba(248,250,252,.88); }
 .nav a[data-nav][href="strategic-life-map.html"]{ border-color: rgba(124,58,237,.30); }
 .nav a[data-nav][href="strategic-life-map.html"].active{ background: rgba(124,58,237,.10); border-color: rgba(124,58,237,.50); box-shadow: 0 0 0 3px rgba(124,58,237,.10) inset, 0 12px 22px rgba(124,58,237,.12); }
 
-.nav a[data-nav][href="income-map.html"]{ border-color: rgba(37,99,235,.30); }
-.nav a[data-nav][href="income-map.html"].active{ background: rgba(37,99,235,.10); border-color: rgba(37,99,235,.55); }
+.nav a[data-nav][href="90-day-income-map.html"]{ border-color: rgba(37,99,235,.30); }
+.nav a[data-nav][href="90-day-income-map.html"].active{ background: rgba(37,99,235,.10); border-color: rgba(37,99,235,.55); }
 
 /* Dopamine mode: same structure, higher color energy (toggleable) */
 body.dopamine{
