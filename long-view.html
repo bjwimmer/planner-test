@@ -6,17 +6,17 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Map · Planner</title>
+  <title>Long View · Planner</title>
   <link rel="icon" href="favicon.ico"/>
   <link rel="stylesheet" href="assets/style.css?v=53"/>
 </head>
-<body data-page="morningMap">
+<body data-page="longview">
   <div class="topbar">
     <div class="container">
       <div class="row" style="justify-content:space-between">
         <div class="brand">
-          <span style="font-size:20px">🧭</span>
-          <span>Morning Map</span>
+          <span style="font-size:20px">🔭</span>
+          <span>Long View</span>
           <span class="badge" data-sync-indicator>• Not connected</span>
           <span class="badge" data-build></span>
         </div>
@@ -28,17 +28,12 @@
           </label>
         </div>
       </div>
-      <div class="nav">
-        <a data-nav href="index.html">Map</a>
-        <a data-nav href="quick-capture.html">⚡ Quick Capture</a>
-        <a data-nav href="thread-registry.html">Thread Registry</a>
-        <a data-nav href="strategic-life-map.html">Strategic Life Map</a>
-        <a data-nav href="90-day-income-map.html">90‑Day Income Map</a>
-        <a data-nav href="how-this-works.html">How This Works</a>
-      </div>
+      <div class="nav"></div>
     </div>
   </div>
+
   <div class="container" id="mainContent" style="padding-top:18px; padding-bottom:28px"></div>
+
   <div class="modal-backdrop" id="syncModalBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Sync Settings">
       <div class="modal-header">
@@ -66,6 +61,7 @@
       <p class="small">Cloud file name: <span class="mono">planner-data.json</span></p>
     </div>
   </div>
+
   <script src="assets/app.v53.js?v=53"></script>
 </body>
 </html>
