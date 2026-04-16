@@ -2060,6 +2060,13 @@ function initLongView(){
     const status = t.status && t.status !== 'active' ? ` [${t.status}]` : '';
     return `${exact ? '↺ ' : ''}${t.title || '(untitled)'}${status}${t.domain ? ` — ${t.domain}` : ''}`;
   }
+  function threadStatusBadge(status){
+    const s = (status || 'active').toLowerCase();
+    if(s === 'archived' || s === 'done' || s === 'completed') return { label:'✓ Done', cls:'tls-done' };
+    if(s === 'paused') return { label:'⏸ Paused', cls:'tls-paused' };
+    if(s.includes('not started')) return { label:'○ Not started', cls:'tls-idle' };
+    return { label:'● Active', cls:'tls-active' };
+  }
   function threadChipsHtml(obj, idx){
     const threads = linkedThreadsForGoal(obj, idx);
     if(!threads.length) return `<div class="small attach-thread-helper">No thread linked yet.</div>`;
