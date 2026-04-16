@@ -700,49 +700,108 @@ function initQuickCapture(){
   const trinketDone    = document.getElementById('trinketDone');
   const trinketDoneSec = document.getElementById('trinketDoneSection');
   const trinketClear   = document.getElementById('trinketClearDone');
+  let editingTrinketId = null;
+
+  function trinketRowHtml(t, doneMode=false){
+    const isEditing = String(editingTrinketId) === String(t.id);
+    if(isEditing){
+      return `
+      <div class="trinket-row ${doneMode ? 'is-done' : ''} is-editing">
+        <input class="trinket-toggle-spacer" aria-hidden="true" tabindex="-1"/>
+        <input class="trinket-edit-input" data-trinket-edit-input="${escapeAttr(String(t.id))}" value="${escapeAttr(t.text || '')}" placeholder="Edit trinket..."/>
+        <button class="btn mini" type="button" data-trinket-save="${escapeAttr(String(t.id))}">Save</button>
+        <button class="btn mini" type="button" data-trinket-cancel="${escapeAttr(String(t.id))}">Cancel</button>
+        <button class="btn mini" type="button" data-trinket-del="${escapeAttr(String(t.id))}" style="color:#ef4444">✕</button>
+      </div>`;
+    }
+    return `
+      <div class="trinket-row ${doneMode ? 'is-done' : ''}">
+        <input type="checkbox" ${doneMode ? 'checked' : ''} ${doneMode ? `data-trinket-uncheck="${escapeAttr(String(t.id))}"` : `data-trinket-check="${escapeAttr(String(t.id))}"`} class="trinket-toggle"/>
+        <span class="trinket-text">${escapeHtml(t.text)}</span>
+        <button class="btn mini" type="button" data-trinket-edit="${escapeAttr(String(t.id))}">Edit</button>
+        <button class="btn mini" type="button" data-trinket-del="${escapeAttr(String(t.id))}" style="color:#ef4444">✕</button>
+      </div>`;
+  }
 
   function renderTrinkets(){
     if(!trinketActive) return;
     const active = st.trinkets.filter(t=>t.status==='open');
     const done   = st.trinkets.filter(t=>t.status==='done');
 
-    trinketActive.innerHTML = active.length ? active.map(t=>`
-      <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(0,0,0,.06)">
-        <input type="checkbox" data-trinket-check="${t.id}" style="width:18px;height:18px;cursor:pointer;flex-shrink:0"/>
-        <span style="flex:1; font-size:14px">${escapeHtml(t.text)}</span>
-        <button class="btn mini" data-trinket-del="${t.id}" style="color:#ef4444">✕</button>
-      </div>
-    `).join('') : `<div class="small muted" style="padding:8px 0">No trinkets yet. Add something small.</div>`;
+    trinketActive.innerHTML = active.length
+      ? active.map(t=>trinketRowHtml(t,false)).join('')
+      : `<div class="small muted" style="padding:8px 0">No trinkets yet. Add something small.</div>`;
 
     trinketDoneSec.style.display = done.length ? 'block' : 'none';
-    trinketDone.innerHTML = done.map(t=>`
-      <div style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid rgba(0,0,0,.04); opacity:.6">
-        <input type="checkbox" checked data-trinket-uncheck="${t.id}" style="width:18px;height:18px;cursor:pointer;flex-shrink:0"/>
-        <span style="flex:1; font-size:13px; text-decoration:line-through">${escapeHtml(t.text)}</span>
-        <button class="btn mini" data-trinket-del="${t.id}" style="color:#ef4444">✕</button>
-      </div>
-    `).join('');
+    trinketDone.innerHTML = done.map(t=>trinketRowHtml(t,true)).join('');
 
-    // Check → move to done
     trinketActive.querySelectorAll('[data-trinket-check]').forEach(cb=>{
       cb.addEventListener('change', ()=>{
         const t = st.trinkets.find(x=>String(x.id)===cb.getAttribute('data-trinket-check'));
         if(t){ t.status='done'; t.doneAt=nowIso(); saveState(st); renderTrinkets(); }
       });
     });
-    // Uncheck → move back to open
+
     trinketDone.querySelectorAll('[data-trinket-uncheck]').forEach(cb=>{
       cb.addEventListener('change', ()=>{
         const t = st.trinkets.find(x=>String(x.id)===cb.getAttribute('data-trinket-uncheck'));
         if(t){ t.status='open'; delete t.doneAt; saveState(st); renderTrinkets(); }
       });
     });
-    // Delete buttons
+
     document.querySelectorAll('[data-trinket-del]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const id = btn.getAttribute('data-trinket-del');
         st.trinkets = st.trinkets.filter(x=>String(x.id)!==String(id));
+        if(String(editingTrinketId) === String(id)) editingTrinketId = null;
         saveState(st); renderTrinkets();
+      });
+    });
+
+    document.querySelectorAll('[data-trinket-edit]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        editingTrinketId = btn.getAttribute('data-trinket-edit');
+        renderTrinkets();
+        const input = document.querySelector(`[data-trinket-edit-input="${CSS.escape(String(editingTrinketId))}"]`);
+        if(input){ input.focus(); input.select(); }
+      });
+    });
+
+    document.querySelectorAll('[data-trinket-cancel]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        editingTrinketId = null;
+        renderTrinkets();
+      });
+    });
+
+    const saveEdit = (id)=>{
+      const input = document.querySelector(`[data-trinket-edit-input="${CSS.escape(String(id))}"]`);
+      if(!input) return;
+      const text = input.value.trim();
+      if(!text){ input.focus(); return; }
+      const t = st.trinkets.find(x=>String(x.id)===String(id));
+      if(!t) return;
+      t.text = text;
+      t.updatedAt = nowIso();
+      editingTrinketId = null;
+      saveState(st);
+      renderTrinkets();
+    };
+
+    document.querySelectorAll('[data-trinket-save]').forEach(btn=>{
+      btn.addEventListener('click', ()=> saveEdit(btn.getAttribute('data-trinket-save')));
+    });
+
+    document.querySelectorAll('[data-trinket-edit-input]').forEach(input=>{
+      input.addEventListener('keydown', e=>{
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          saveEdit(input.getAttribute('data-trinket-edit-input'));
+        }else if(e.key === 'Escape'){
+          e.preventDefault();
+          editingTrinketId = null;
+          renderTrinkets();
+        }
       });
     });
   }
@@ -753,6 +812,7 @@ function initQuickCapture(){
       if(!text) return;
       st.trinkets.push({ id: uid(), text, status:'open', createdAt: nowIso() });
       trinketInput.value = '';
+      editingTrinketId = null;
       saveState(st); renderTrinkets();
     };
     trinketAdd.addEventListener('click', addTrinket);
@@ -762,6 +822,7 @@ function initQuickCapture(){
   if(trinketClear){
     trinketClear.addEventListener('click', ()=>{
       st.trinkets = st.trinkets.filter(t=>t.status!=='done');
+      if(editingTrinketId && !st.trinkets.some(t=>String(t.id)===String(editingTrinketId))) editingTrinketId = null;
       saveState(st); renderTrinkets();
     });
   }
