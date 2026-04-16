@@ -2076,7 +2076,7 @@ function initLongView(){
         + `<button class="thread-link-pill" type="button" data-lv-open-thread="${escapeAttr(String(t.id))}" title="Open thread: ${escapeAttr(t.title || 'Untitled thread')}">`
         + `<span class="tlp-icon">🧵</span>`
         + `<span class="tlp-title">${escapeHtml(t.title || 'Untitled thread')}</span>`
-        + badge
+        + `<span class="tlp-status ${badge.cls}">${badge.label}</span>`
         + `</button>`
         + `<button class="thread-unlink-btn" type="button" data-lv-unlink-thread="${escapeAttr(obj.id)}" data-idx="${idx}" data-thread-id="${escapeAttr(String(t.id))}" title="Remove linked thread: ${escapeAttr(t.title || 'Untitled thread')}" aria-label="Remove linked thread: ${escapeAttr(t.title || 'Untitled thread')}">×</button>`
         + `</div>`;
@@ -2111,6 +2111,19 @@ function initLongView(){
         </div>
       </div>`;
   }
+  function syncLongViewInputsToState(targetObjId){
+    const selector = targetObjId
+      ? `.lv-goal-input[data-obj="${cssEscape(targetObjId)}"]`
+      : '.lv-goal-input';
+    container.querySelectorAll(selector).forEach(inp => {
+      const objId = inp.getAttribute('data-obj');
+      const idx = Number(inp.getAttribute('data-idx'));
+      const obj = st.longView.objectives.find(o => o.id === objId);
+      if(!obj || !Number.isFinite(idx)) return;
+      obj.goals[idx] = inp.value.trim();
+    });
+  }
+
   function createButtonMeta(obj, idx, goalText){
     const match = exactMatchThread(goalText);
     const linkedIds = getGoalLinkIds(obj, idx);
@@ -2193,10 +2206,7 @@ function initLongView(){
         const objId = btn.getAttribute('data-obj');
         const obj   = st.longView.objectives.find(o => o.id === objId);
         if(!obj) return;
-        container.querySelectorAll(`.lv-goal-input[data-obj="${objId}"]`).forEach(inp => {
-          const idx = Number(inp.getAttribute('data-idx'));
-          obj.goals[idx] = inp.value.trim();
-        });
+        syncLongViewInputsToState(objId);
         saveState(st);
         toast('Saved');
         render();
@@ -2228,6 +2238,7 @@ function initLongView(){
       btn.addEventListener('click', () => {
         const objId = btn.getAttribute('data-lv-attach-thread');
         const idx = Number(btn.getAttribute('data-idx'));
+        syncLongViewInputsToState(objId);
         const obj = st.longView.objectives.find(o => o.id === objId);
         if(!obj) return;
         const sel = container.querySelector(`[data-lv-attach-thread-select="${cssEscape(objId)}"][data-idx="${idx}"]`);
@@ -2245,6 +2256,7 @@ function initLongView(){
         if(btn.disabled) return;
         const objId = btn.getAttribute('data-obj');
         const idx   = Number(btn.getAttribute('data-idx'));
+        syncLongViewInputsToState(objId);
         const obj   = st.longView.objectives.find(o => o.id === objId);
         if(!obj) return;
         const goalText = String(obj.goals[idx] || '').trim();
